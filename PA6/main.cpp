@@ -3,7 +3,6 @@
 * Mikaela Dean and Sierra Svetlik (?)
 * 12/11/2020
 */
-//#define SFML_NO_DEPRECATED_WARNINGS
 #include <iostream>
 #include <SFML/Graphics.hpp>
 int main(int argc, char * argv[])

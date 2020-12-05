@@ -19,18 +19,19 @@ template<typename K, typename V> class HashTable{
 private:
 
 	int numvalidelements, vectorsize;
-
+	std::vector<int> tempvect;
 	struct hashobject{
 		std::pair<K, V> entry;
 		EntryState state;
 	}
-
+	int killme;
 	std::vector<hashobject> linvector;
 
 	int findNextPrime(int n);
 
 	int isPrime(int n);
 
+	int hash(const K& key);
 public:
 
 HashTable(int n = 11);
@@ -59,7 +60,7 @@ int bucket_count();
 
 int bucket_size(int n);
 
-int bucket(const k& key);
+int bucket(const K& key);
 
 float load_factor();
 
