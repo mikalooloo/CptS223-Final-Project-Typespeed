@@ -1,8 +1,8 @@
 /*
 * CPTS223 PA 6
-* Mikaela Dean and Sierra Meeonka
+* Mikaela Dean and Sierra Svetlik
 * 12/11/2020
-* main.cpp
+* Button.hpp
 */
 #ifndef BUTTON_HPP
 #define BUTTON_HPP
@@ -40,8 +40,8 @@ public:
     *  Inputs: string normalT and string hoveringT, which should both be paths to the images to use, MenuAction p which should be the action you want the button take when clicked, and Vector2f the location where you want the button to be
     *  Outputs: n/a
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
-    *  Date Last Modified: 12/4/2020
+    *  Date Created: 12/02/2020
+    *  Date Last Modified: 12/04/2020
     *  Update Notes: changed clickState from bool to ClickState
     */
     Button(std::string normalT, std::string hoveringT, MenuAction p, sf::Vector2f l);
@@ -54,29 +54,30 @@ public:
     *  Inputs: string t, which should be the path to the image, and bool normal (true if setting the normalTexture and sprite, false if setting the hoveringTexture and sprite)
     *  Outputs: n/a
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
+    *  Date Created: 12/02/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
     void setTexture(std::string t, bool normal);
     /* 
-    *  Function: setState
+    *  Function: setClickState
     *  Description: sets clickState as c and updates the spriteState appropiately
     *  Inputs: ClickState c
     *  Outputs: n/a
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
-    *  Date Last Modified: 12/4/2020
-    *  Update Notes: changed input parameter from bool to ClickState
+    *  Date Created: 12/02/2020
+    *  Date Last Modified: 12/05/2020
+    *  Update Notes: changed the function name from setState to setClickState to match other functions
+    *  12/4/2020 - changed input parameter from bool to ClickState
     */
-    void setState(ClickState c);
+    void setClickState(ClickState c);
     /* 
     *  Function: setLocation
     *  Description: sets the location of the button to l
     *  Inputs: Vector2f l
     *  Outputs: n/a
     *  Preconditions: n/a
-    *  Date Created: 12/4/2020
+    *  Date Created: 12/04/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
@@ -87,7 +88,7 @@ public:
     *  Inputs: MenuAction p
     *  Outputs: n/a
     *  Preconditions: n/a
-    *  Date Created: 12/4/2020
+    *  Date Created: 12/04/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
@@ -100,7 +101,7 @@ public:
     *  Inputs: n/a
     *  Outputs: MenuAction
     *  Preconditions: n/a
-    *  Date Created: 12/4/2020
+    *  Date Created: 12/04/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
@@ -111,8 +112,8 @@ public:
     *  Inputs: n/a
     *  Outputs: ClickState
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
-    *  Date Last Modified: 12/4/2020
+    *  Date Created: 12/02/2020
+    *  Date Last Modified: 12/04/2020
     *  Update Notes: changed return type from bool to ClickState
     */
     ClickState getClickState(void);
@@ -122,7 +123,7 @@ public:
     *  Inputs: n/a
     *  Outputs: sf::Sprite
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
+    *  Date Created: 12/02/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
@@ -135,8 +136,8 @@ public:
     *  Inputs: Vector2f mousePos (will need to translate mouse coordinates from 2i to 2f), bool clicked 
     *  Outputs: MenuAction 
     *  Preconditions: n/a
-    *  Date Created: 12/2/2020
-    *  Date Last Modified: 12/4/2020
+    *  Date Created: 12/02/2020
+    *  Date Last Modified: 12/04/2020
     *  Update Notes: changed the return type from void to MenuAction, so buttons can do something now, and added bool clicked to add hovering function of button
     */
     MenuAction checkClick(sf::Vector2f mousePos, bool clicked);

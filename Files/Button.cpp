@@ -1,3 +1,10 @@
+
+/*
+* CPTS223 PA 6
+* Mikaela Dean and Sierra Svetlik
+* 12/11/2020
+* Button.cpp
+*/
 #include "Button.hpp"
 
 // ****************************CONSTRUCTORS****************************
@@ -39,7 +46,7 @@ void Button::setPurpose(MenuAction p)
 {
     buttonPurpose = p;
 }
-void Button::setState(ClickState c) 
+void Button::setClickState(ClickState c) 
 {
     clickState = c;
     if (clickState == HOVERING) spriteState = &hovering; // changes sprite to match the ClickState
@@ -72,19 +79,19 @@ MenuAction Button::checkClick(sf::Vector2f mousePos, bool clicked)
     {
         if (!clicked) // and it hasn't been clicked
         {
-            setState(HOVERING); // it must be hovering, return none but change the sprite to hovering
+            setClickState(HOVERING); // it must be hovering, return none but change the sprite to hovering
             return NONE;
         }
         else // if it has been clicked,
         {
-            setState(CLICKED);
+            setClickState(CLICKED);
             return buttonPurpose; // return the button's purpose since it's been clicked
         }
 
     }
     else // if the mouse isn't inside the sprite,
     {
-        setState(NORMAL); // return the button to normal and return none from this function
+        setClickState(NORMAL); // return the button to normal and return none from this function
         return NONE;
     }
 }

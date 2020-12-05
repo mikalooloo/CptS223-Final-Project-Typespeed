@@ -1,6 +1,6 @@
 /*
 * CPTS223 PA 6
-* Mikaela Dean and Sierra Meeonka (?)
+* Mikaela Dean and Sierra Svetlik
 * 12/11/2020
 * main.cpp
 */
@@ -14,14 +14,14 @@ int main(int argc, char * argv[])
 
     // *******BUTTONS*******
     // hex codes for normal: 770077 and 180066 clicked: 990099 and 0000dd
-    sf::Vector2f playbuttonLoc(500.f, 75.f); 
-    Button playbutton("Images/PlayButtonNormal.png","Images/PlayButtonHover.png",PLAY,playbuttonLoc);
-    sf::Vector2f rulesbuttonLoc(500.f, 275.f); 
-    Button rulesbutton("Images/RulesButtonNormal.png","Images/RulesButtonHover.png",RULES,rulesbuttonLoc);
-    sf::Vector2f optionsbuttonLoc(500.f, 475.f); 
-    Button optionsbutton("Images/OptionsButtonNormal.png","Images/OptionsButtonHover.png",OPTIONS,optionsbuttonLoc);
-    sf::Vector2f exitbuttonLoc(500.f, 675.f); 
-    Button exitbutton("Images/ExitButtonNormal.png","Images/ExitButtonHover.png",EXIT,exitbuttonLoc);
+    sf::Vector2f buttonLocation(500.f, 75.f); 
+    Button playbutton("Images/PlayButtonNormal.png","Images/PlayButtonHover.png",PLAY,buttonLocation);
+    buttonLocation.y += 200;
+    Button rulesbutton("Images/RulesButtonNormal.png","Images/RulesButtonHover.png",RULES,buttonLocation);
+    buttonLocation.y += 200;
+    Button optionsbutton("Images/OptionsButtonNormal.png","Images/OptionsButtonHover.png",OPTIONS,buttonLocation);
+    buttonLocation.y += 200;
+    Button exitbutton("Images/ExitButtonNormal.png","Images/ExitButtonHover.png",EXIT,buttonLocation);
 
     // *******FONTS*******
     sf::Font font;
@@ -41,7 +41,8 @@ int main(int argc, char * argv[])
             if (event.type == sf::Event::Closed) window.close();
         }
 
-        if (result == NONE) // if currently in main menu
+        // *******MOUSE POSITIONING*******
+        if (result == NONE) // if currently in main menu, check to see where the mouse is
         {
             auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) // is something being clicked?
@@ -66,7 +67,7 @@ int main(int argc, char * argv[])
         {
             case PLAY: 
                 if(playbutton.getClickState() == CLICKED) text.setString("Loading the gameplay...");
-                playbutton.setState(NORMAL);
+                playbutton.setClickState(NORMAL);
 
                 window.clear();
                 window.draw(text);
@@ -75,7 +76,7 @@ int main(int argc, char * argv[])
 
             case RULES:
                 if(rulesbutton.getClickState() == CLICKED) text.setString("Loading the rules...");
-                rulesbutton.setState(NORMAL);
+                rulesbutton.setClickState(NORMAL);
 
                 window.clear();
                 window.draw(text);
@@ -84,7 +85,7 @@ int main(int argc, char * argv[])
 
             case OPTIONS:
                 if(optionsbutton.getClickState() == CLICKED) text.setString("Loading the options...");
-                optionsbutton.setState(NORMAL);
+                optionsbutton.setClickState(NORMAL);
 
                 window.clear();
                 window.draw(text);
@@ -95,17 +96,10 @@ int main(int argc, char * argv[])
                 window.close();
                 break;
 
-            case NONE:
-                window.clear();
-                window.draw(playbutton.getSprite());
-                window.draw(rulesbutton.getSprite());
-                window.draw(optionsbutton.getSprite());
-                window.draw(exitbutton.getSprite());
-                window.display();
+            case NONE: // if none, then it's the main menu
+                loadMainMenu(&window, &playbutton, &rulesbutton, &optionsbutton, &exitbutton);
                 break;
         }
-
-
 
     }
     return 0; 
