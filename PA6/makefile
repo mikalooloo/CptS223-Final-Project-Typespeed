@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -g -Wall -std=c++11 -fopenmp -lsfml-window -lsfml-system -lsfml-graphics
-DEPS = 
-OBJ = main.cpp
+DEPS = hash.h
+OBJ = main.cpp hash.cpp
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
