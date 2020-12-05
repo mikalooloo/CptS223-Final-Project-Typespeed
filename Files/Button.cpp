@@ -1,18 +1,21 @@
 #include "Button.hpp"
 
-Button::Button(std::string normalT, std::string clickedT, sf::Vector2f l)
+// ****************************CONSTRUCTORS****************************
+Button::Button(std::string normalT, std::string hoveringT, MenuAction p, sf::Vector2f l)
 {
     setTexture(normalT, true);
-    setTexture(clickedT,false);
+    setTexture(hoveringT,false);
     this->spriteState = &this->normal;
+
+    buttonPurpose = p;
+    clickState = NORMAL;
 
     this->location = l;
     this->normal.setPosition(location);
-    this->clicked.setPosition(location);
-
-    clickState = false;
+    this->hovering.setPosition(location);
 }
 
+// ****************************SETTERS****************************
 void Button::setTexture(std::string t, bool normal)
 {
     if (normal) // if true, then load the t texture for normal
@@ -23,26 +26,36 @@ void Button::setTexture(std::string t, bool normal)
         }
         this->normal.setTexture(normalTexture);
     }
-    else // if false, then load the t texture for clicked
+    else // if false, then load the t texture for hovering
     {
-        if(!clickedTexture.loadFromFile(t))
+        if(!hoveringTexture.loadFromFile(t))
         {
             throw std::runtime_error("Texture failed to load");
         }
-        this->clicked.setTexture(clickedTexture);
+        this->hovering.setTexture(hoveringTexture);
     }
 }
-
-// Setters
-void Button::setState(bool c) 
+void Button::setPurpose(MenuAction p)
+{
+    buttonPurpose = p;
+}
+void Button::setState(ClickState c) 
 {
     clickState = c;
-    if (clickState) spriteState = &clicked; // if clickState is true, change sprite to clicked as well
-    else spriteState = &normal; // otherwise it's no longer clicked, change sprite back to normal
+    if (clickState == HOVERING) spriteState = &hovering; // changes sprite to match the ClickState
+    else spriteState = &normal; // otherwise no longer hovering, change sprite back to normal
+}
+void Button::setLocation(sf::Vector2f l)
+{
+    location = l;
 }
 
-// Getters
-bool Button::getClickState(void) 
+// ****************************GETTERS****************************
+MenuAction Button::getPurpose(void)
+{
+    return buttonPurpose;
+}
+ClickState Button::getClickState(void) 
 {
     return clickState;
 }
@@ -51,10 +64,27 @@ sf::Sprite Button::getSprite(void)
     return *spriteState;
 }
 
-// Functions
-void Button::checkClick(sf::Vector2f mousePos) 
+// ****************************FUNCTIONS****************************
+MenuAction Button::checkClick(sf::Vector2f mousePos, bool clicked) 
 {
-    // if the mouse position is inside the sprite, set the clickState to true! otherwise set it to false
-    if (spriteState->getGlobalBounds().contains(mousePos)) setState(true); 
-    else setState(false);
+    // if the mouse position is inside the sprite, 
+    if (spriteState->getGlobalBounds().contains(mousePos)) 
+    {
+        if (!clicked) // and it hasn't been clicked
+        {
+            setState(HOVERING); // it must be hovering, return none but change the sprite to hovering
+            return NONE;
+        }
+        else // if it has been clicked,
+        {
+            setState(CLICKED);
+            return buttonPurpose; // return the button's purpose since it's been clicked
+        }
+
+    }
+    else // if the mouse isn't inside the sprite,
+    {
+        setState(NORMAL); // return the button to normal and return none from this function
+        return NONE;
+    }
 }

@@ -4,43 +4,54 @@
 * 12/11/2020
 * main.cpp
 */
+#ifndef BUTTON_HPP
+#define BUTTON_HPP
 
-#include <SFML/Graphics.hpp>
-#include <iostream>
+#include "header.h"
+
+enum ClickState
+{
+    NORMAL,
+    CLICKED,
+    HOVERING
+};
 
 class Button
 {
 private:
 
     sf::Texture normalTexture; 
-    sf::Texture clickedTexture;
+    sf::Texture hoveringTexture;
 
     sf::Sprite normal;
-    sf::Sprite clicked;
+    sf::Sprite hovering;
     sf::Sprite * spriteState;
 
-    sf::Vector2f location;
-    bool clickState;
+    MenuAction buttonPurpose;
+    ClickState clickState;
 
+    sf::Vector2f location;
 
 public:
-    // ****CONSTRUCTORS****
+    // ****************************CONSTRUCTORS****************************
     /* 
     *  Function: Button explicit constructor
-    *  Description: uses setTexture with normalT and clickedT to set normalTexture/normal and clickedTexture/clicked and uses l to set location. Also sets spriteState to normal and clickState to false
-    *  Inputs: string normalT and string clickedT, which should both be paths to the images to use and Vector2f the location where you want the button to be
+    *  Description: uses setTexture with normalT and hoveringT to set normalTexture/normal and hoveringTexture/hovering, uses l to set location, and uses p to set buttonPurpose. Also sets spriteState to normal and clickState to normal
+    *  Inputs: string normalT and string hoveringT, which should both be paths to the images to use, MenuAction p which should be the action you want the button take when clicked, and Vector2f the location where you want the button to be
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/2/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/4/2020
+    *  Update Notes: changed clickState from bool to ClickState
     */
-    Button(std::string normalT, std::string clickedT, sf::Vector2f l);
+    Button(std::string normalT, std::string hoveringT, MenuAction p, sf::Vector2f l);
 
+
+    // ****************************SETTERS****************************
     /* 
     *  Function: setTexture
-    *  Description: if bool is true, loads the string for normalTexture and loads the normal sprite, otherwise if bool is false does the same for clicked
-    *  Inputs: string t, which should be the path to the image, and bool normal (true if setting the normalTexture and sprite, false if setting the clickedTexture and sprite)
+    *  Description: if bool is true, loads the string for normalTexture and loads the normal sprite, otherwise if bool is false does the same for hovering
+    *  Inputs: string t, which should be the path to the image, and bool normal (true if setting the normalTexture and sprite, false if setting the hoveringTexture and sprite)
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/2/2020
@@ -48,32 +59,63 @@ public:
     *  Update Notes: n/a
     */
     void setTexture(std::string t, bool normal);
-
-    // ****SETTERS****
     /* 
     *  Function: setState
-    *  Description: sets clickState as c and updates the spriteState (if clickState is true, updates to clicked, if false, updates to normal)
-    *  Inputs: bool c (true if clicked)
+    *  Description: sets clickState as c and updates the spriteState appropiately
+    *  Inputs: ClickState c
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/2/2020
+    *  Date Last Modified: 12/4/2020
+    *  Update Notes: changed input parameter from bool to ClickState
+    */
+    void setState(ClickState c);
+    /* 
+    *  Function: setLocation
+    *  Description: sets the location of the button to l
+    *  Inputs: Vector2f l
+    *  Outputs: n/a
+    *  Preconditions: n/a
+    *  Date Created: 12/4/2020
     *  Date Last Modified: n/a
     *  Update Notes: n/a
     */
-    void setState(bool c);
+    void setLocation(sf::Vector2f l);
+    /* 
+    *  Function: setPurpose
+    *  Description: sets the buttonPurpose to p
+    *  Inputs: MenuAction p
+    *  Outputs: n/a
+    *  Preconditions: n/a
+    *  Date Created: 12/4/2020
+    *  Date Last Modified: n/a
+    *  Update Notes: n/a
+    */
+    void setPurpose(MenuAction p);
 
-    // ****GETTERS****
+    // ****************************GETTERS****************************
+    /* 
+    *  Function: getPurpose
+    *  Description: returns the button's purpose via MenuAction 
+    *  Inputs: n/a
+    *  Outputs: MenuAction
+    *  Preconditions: n/a
+    *  Date Created: 12/4/2020
+    *  Date Last Modified: n/a
+    *  Update Notes: n/a
+    */
+    MenuAction getPurpose(void);
     /* 
     *  Function: getClickState
-    *  Description: returns bool of the clickState variable (true if currently clicked, false if not)
+    *  Description: returns ClickState of button
     *  Inputs: n/a
-    *  Outputs: bool 
+    *  Outputs: ClickState
     *  Preconditions: n/a
     *  Date Created: 12/2/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/4/2020
+    *  Update Notes: changed return type from bool to ClickState
     */
-    bool getClickState(void);
+    ClickState getClickState(void);
     /* 
     *  Function: getSprite
     *  Description: returns sf::Sprite of the current Sprite (spriteState)
@@ -86,19 +128,21 @@ public:
     */
     sf::Sprite getSprite(void);
 
-    // ****FUNCTIONS****
+    // ****************************FUNCTIONS****************************
     /* 
     *  Function: checkClick
-    *  Description: checks if the mouse is inside the sprite and if so, changes the texture to clicked and clickState to true, if not, changes the texture to normal and clickState to false
-    *  Inputs: Vector2f mousePos (will need to translate mouse coordinates from 2i to 2f)
-    *  Outputs: n/a
-    *  Preconditions: mouse has been clicked
+    *  Description: checks if the mouse is inside the sprite and if clicked is false changes the texture to hovering and clickState to hovering, if clicked is true it returns the button's purpose, but if the mouse is not inside the spite, changes the texture to normal and clickState to normal
+    *  Inputs: Vector2f mousePos (will need to translate mouse coordinates from 2i to 2f), bool clicked 
+    *  Outputs: MenuAction 
+    *  Preconditions: n/a
     *  Date Created: 12/2/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a 
+    *  Date Last Modified: 12/4/2020
+    *  Update Notes: changed the return type from void to MenuAction, so buttons can do something now, and added bool clicked to add hovering function of button
     */
-    void checkClick(sf::Vector2f mousePos);
+    MenuAction checkClick(sf::Vector2f mousePos, bool clicked);
 };
+
+#endif
 
     /* 
     *  Function: 
