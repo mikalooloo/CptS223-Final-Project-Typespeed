@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -g -Wall -std=c++11 -fopenmp -lsfml-graphics -lsfml-window -lsfml-system
-DEPS = Button.hpp
+DEPS = header.h Button.hpp
 OBJ = main.cpp source.cpp Button.cpp
 
 %.o: %.c $(DEPS)
