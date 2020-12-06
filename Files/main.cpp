@@ -9,7 +9,7 @@
 
 int main(int argc, char * argv[])
 {
-    // *******WINDOW*******
+    // *******WINDOW AND BACKGROUND*******
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "Typespeed");
     sf::Texture backgroundTexture;
     if (!backgroundTexture.loadFromFile("Images/VaporwaveBackground.png")) throw std::runtime_error("Texture failed to load");
@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
     subtitletext1.setPosition(80.0f, 400.f); // underneath the title, for main menu
     sf::Text subtitletext2("keep up?", font, 50);
     subtitletext2.setPosition(100.0f, 475.f); // underneath the title, for main menu
-    
+
     sf::Text creditstext1("Credits", font, 50);
     creditstext1.setPosition(1470.0f, 300.0f); // righthand side of main menu
     sf::Text creditstext2("Mikaela Dean", font, 35);
@@ -74,6 +74,7 @@ int main(int argc, char * argv[])
                 {
                     result = buttonArray[i]->checkClick(translated_pos, true);
                 }
+
             }
             else // otherwise, checking for hovering!
             {
