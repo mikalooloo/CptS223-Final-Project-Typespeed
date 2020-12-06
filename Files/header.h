@@ -9,6 +9,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <array>
 
 class Button; // forward declaration
 
@@ -35,15 +36,15 @@ void createText(sf::Font * f, std::string fString);
 
 /* 
 *  Function: loadMainMenu
-*  Description: clears the window, draws all buttons, displays window for main menu
-*  Inputs: RenderWindow window, then the four buttons for the main menu
+*  Description: clears the window, draws background, all buttons and text, displays window for main menu
+*  Inputs: RenderWindow * window, Sprite * background, button and text arrays
 *  Outputs: n/a
 *  Preconditions: the screen is on the main menu
 *  Date Created: 12/05/2020
 *  Date Last Modified: n/a
 *  Update Notes: n/a
 */
-void loadMainMenu(sf::RenderWindow * window, Button * playbutton, Button * rulesbutton, Button * optionsbutton, Button * exitbutton);
+void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array<Button *, 4> buttonArray, std::array<sf::Text *, 6> textArray);
 
 #endif
 

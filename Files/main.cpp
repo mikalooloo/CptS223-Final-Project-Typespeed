@@ -11,10 +11,14 @@ int main(int argc, char * argv[])
 {
     // *******WINDOW*******
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "Typespeed");
+    sf::Texture backgroundTexture;
+    if (!backgroundTexture.loadFromFile("Images/VaporwaveBackground.png")) throw std::runtime_error("Texture failed to load");
+    sf::Sprite background(backgroundTexture);
+    background.setScale(0.725,0.65);
 
     // *******BUTTONS*******
     // hex codes for normal: 770077 and 180066 clicked: 990099 and 0000dd
-    sf::Vector2f buttonLocation(500.f, 75.f); 
+    sf::Vector2f buttonLocation(535.f, 75.f); 
     Button playbutton("Images/PlayButtonNormal.png","Images/PlayButtonHover.png",PLAY,buttonLocation);
     buttonLocation.y += 200;
     Button rulesbutton("Images/RulesButtonNormal.png","Images/RulesButtonHover.png",RULES,buttonLocation);
@@ -23,11 +27,29 @@ int main(int argc, char * argv[])
     buttonLocation.y += 200;
     Button exitbutton("Images/ExitButtonNormal.png","Images/ExitButtonHover.png",EXIT,buttonLocation);
 
-    // *******FONTS*******
+    std::array<Button *, 4> buttonArray = { &playbutton, &rulesbutton, &optionsbutton, &exitbutton };
+
+    // *******TEXTS AND FONTS*******
     sf::Font font;
     createText(&font, "Fonts/Seaside Resort Font.ttf");
-    sf::Text text("Loading the gameplay...", font, 30);
-    text.setPosition(30.0f, 30.0f);
+    sf::Text text("", font, 30);
+    text.setPosition(30.0f, 30.f); // top left
+
+    sf::Text titletext("Typespeed", font, 80);
+    titletext.setPosition(30.0f, 175.0f); // top left, title screen/main menu
+    sf::Text subtitletext1("can you", font, 50);
+    subtitletext1.setPosition(80.0f, 400.f); // underneath the title, for main menu
+    sf::Text subtitletext2("keep up?", font, 50);
+    subtitletext2.setPosition(100.0f, 475.f); // underneath the title, for main menu
+    
+    sf::Text creditstext1("Credits", font, 50);
+    creditstext1.setPosition(1470.0f, 300.0f); // righthand side of main menu
+    sf::Text creditstext2("Mikaela Dean", font, 35);
+    creditstext2.setPosition(1445.0f, 375.0f); // righthand side of main menu
+    sf::Text creditstext3("Sierra Svetlik", font, 35);
+    creditstext3.setPosition(1445.0f, 425.0f); // righthand side of main menu
+
+    std::array<sf::Text *,6> textArray = { &titletext, &subtitletext1, &subtitletext2, &creditstext1, &creditstext2, &creditstext3};
 
     // *******VARIABLES*******
     MenuAction result = NONE;
@@ -48,17 +70,17 @@ int main(int argc, char * argv[])
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) // is something being clicked?
             {
                 // then check if it was a button that was clicked
-                result = playbutton.checkClick(translated_pos, true); 
-                if (result == NONE) result = rulesbutton.checkClick(translated_pos, true); // if result == NONE is there because otherwise it can overwrite a previous button
-                if (result == NONE) result = optionsbutton.checkClick(translated_pos, true);
-                if (result == NONE) result = exitbutton.checkClick(translated_pos, true);
+                for (long unsigned int i = 0; i < buttonArray.size() && result == NONE; ++i)
+                {
+                    result = buttonArray[i]->checkClick(translated_pos, true);
+                }
             }
             else // otherwise, checking for hovering!
             {
-                playbutton.checkClick(translated_pos, false);
-                rulesbutton.checkClick(translated_pos, false);
-                optionsbutton.checkClick(translated_pos, false);
-                exitbutton.checkClick(translated_pos, false);
+                for (long unsigned int i = 0; i < buttonArray.size(); ++i)
+                {
+                    buttonArray[i]->checkClick(translated_pos, false);
+                }
             }
         }
 
@@ -97,7 +119,7 @@ int main(int argc, char * argv[])
                 break;
 
             case NONE: // if none, then it's the main menu
-                loadMainMenu(&window, &playbutton, &rulesbutton, &optionsbutton, &exitbutton);
+                loadMainMenu(&window, &background, buttonArray, textArray);
                 break;
         }
 

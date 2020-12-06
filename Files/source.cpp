@@ -15,12 +15,21 @@ void createText(sf::Font * f, std::string fString)
     }
 }
 
-void loadMainMenu(sf::RenderWindow * window, Button * playbutton, Button * rulesbutton, Button * optionsbutton, Button * exitbutton)
+void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array<Button *, 4> buttonArray, std::array<sf::Text *, 6> textArray)
 {
     window->clear();
-    window->draw(playbutton->getSprite());
-    window->draw(rulesbutton->getSprite());
-    window->draw(optionsbutton->getSprite());
-    window->draw(exitbutton->getSprite());
+
+    window->draw(*background);
+    
+    for (long unsigned int i = 0; i < buttonArray.size(); ++i) // prints all buttons
+    {
+        window->draw(buttonArray[i]->getSprite());
+    }
+
+    for (long unsigned int i = 0; i < textArray.size(); ++i) // prints all text
+    {
+        window->draw(*textArray[i]);
+    }
+
     window->display();
 }
