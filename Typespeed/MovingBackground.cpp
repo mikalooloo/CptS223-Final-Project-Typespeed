@@ -7,6 +7,12 @@
 #include "MovingBackground.hpp"
 
 // ****************************CONSTRUCTORS****************************
+MovingBackground::MovingBackground()
+{
+    direction = RIGHT;
+    backgroundX = 0;
+    backgroundY = 0;
+}
 MovingBackground::MovingBackground(std::string texturePath, Direction d)
 {
     setTexture(texturePath);
@@ -61,7 +67,7 @@ void MovingBackground::update(void)
 {
     switch (direction)
     {
-        case RIGHT: // makes the background look like it's moving to the right,
+        case RIGHT: case ALL: // makes the background look like it's moving to the right,
             if (backgroundX < 1920) backgroundX -= 0.1;
             else backgroundX = 0;
 

@@ -8,14 +8,14 @@
 #include "Button.hpp"
 
 // ****************************CONSTRUCTORS****************************
-Button::Button(std::string normalT, std::string hoveringT, MenuAction p, sf::Vector2f l)
+Button::Button(std::string normalT, std::string hoveringT, Action p, sf::Vector2f l)
 {
     setTexture(normalT, true);
     setTexture(hoveringT,false);
     this->spriteState = &this->normal;
 
     buttonPurpose = p;
-    clickState = NORMAL;
+    clickState = NORMALB;
 
     this->location = l;
     this->normal.setPosition(location);
@@ -36,7 +36,7 @@ void Button::setTexture(std::string t, bool normal)
         this->hovering.setTexture(hoveringTexture);
     }
 }
-void Button::setPurpose(MenuAction p)
+void Button::setPurpose(Action p)
 {
     buttonPurpose = p;
 }
@@ -52,7 +52,7 @@ void Button::setLocation(sf::Vector2f l)
 }
 
 // ****************************GETTERS****************************
-MenuAction Button::getPurpose(void)
+Action Button::getPurpose(void)
 {
     return buttonPurpose;
 }
@@ -66,7 +66,7 @@ sf::Sprite Button::getSprite(void)
 }
 
 // ****************************FUNCTIONS****************************
-MenuAction Button::checkClick(sf::Vector2f mousePos, bool clicked) 
+Action Button::checkClick(sf::Vector2f mousePos, bool clicked) 
 {
     // if the mouse position is inside the sprite, 
     if (spriteState->getGlobalBounds().contains(mousePos)) 
@@ -85,7 +85,7 @@ MenuAction Button::checkClick(sf::Vector2f mousePos, bool clicked)
     }
     else // if the mouse isn't inside the sprite,
     {
-        setClickState(NORMAL); // return the button to normal and return none from this function
+        setClickState(NORMALB); // return the button to normal and return none from this function
         return NONE;
     }
 }

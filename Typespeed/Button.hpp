@@ -11,7 +11,7 @@
 
 enum ClickState
 {
-    NORMAL,
+    NORMALB,
     CLICKED,
     HOVERING
 };
@@ -27,7 +27,7 @@ private:
     sf::Sprite hovering;
     sf::Sprite * spriteState;
 
-    MenuAction buttonPurpose;
+    Action buttonPurpose;
     ClickState clickState;
 
     sf::Vector2f location;
@@ -37,14 +37,15 @@ public:
     /* 
     *  Function: Button explicit constructor
     *  Description: uses setTexture with normalT and hoveringT to set normalTexture/normal and hoveringTexture/hovering, uses l to set location, and uses p to set buttonPurpose. Also sets spriteState to normal and clickState to normal
-    *  Inputs: string normalT and string hoveringT, which should both be paths to the images to use, MenuAction p which should be the action you want the button take when clicked, and Vector2f the location where you want the button to be
+    *  Inputs: string normalT and string hoveringT, which should both be paths to the images to use, Action p which should be the action you want the button take when clicked, and Vector2f the location where you want the button to be
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/02/2020
-    *  Date Last Modified: 12/04/2020
-    *  Update Notes: changed clickState from bool to ClickState
+    *  Date Last Modified: 12/08/2020
+    *  Update Notes: changed MenuAction to Action
+    *  12/04/2020 - changed clickState from bool to ClickState
     */
-    Button(std::string normalT, std::string hoveringT, MenuAction p, sf::Vector2f l);
+    Button(std::string normalT, std::string hoveringT, Action p, sf::Vector2f l);
 
 
     // ****************************SETTERS****************************
@@ -85,27 +86,27 @@ public:
     /* 
     *  Function: setPurpose
     *  Description: sets the buttonPurpose to p
-    *  Inputs: MenuAction p
+    *  Inputs: Action p
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/04/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/08/2020
+    *  Update Notes: changed MenuAction to Action
     */
-    void setPurpose(MenuAction p);
+    void setPurpose(Action p);
 
     // ****************************GETTERS****************************
     /* 
     *  Function: getPurpose
-    *  Description: returns the button's purpose via MenuAction 
+    *  Description: returns the button's purpose via Action 
     *  Inputs: n/a
-    *  Outputs: MenuAction
+    *  Outputs: Action
     *  Preconditions: n/a
     *  Date Created: 12/04/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/08/2020
+    *  Update Notes: changed MenuAction to Action
     */
-    MenuAction getPurpose(void);
+    Action getPurpose(void);
     /* 
     *  Function: getClickState
     *  Description: returns ClickState of button
@@ -137,10 +138,11 @@ public:
     *  Outputs: MenuAction 
     *  Preconditions: n/a
     *  Date Created: 12/02/2020
-    *  Date Last Modified: 12/04/2020
-    *  Update Notes: changed the return type from void to MenuAction, so buttons can do something now, and added bool clicked to add hovering function of button
+    *  Date Last Modified: 12/08/2020
+    *  Update Notes: changed MenuAction to Action
+    *  12/04/2020 - changed the return type from void to MenuAction, so buttons can do something now, and added bool clicked to add hovering function of button
     */
-    MenuAction checkClick(sf::Vector2f mousePos, bool clicked);
+    Action checkClick(sf::Vector2f mousePos, bool clicked);
 };
 
 #endif

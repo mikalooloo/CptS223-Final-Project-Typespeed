@@ -13,14 +13,22 @@
 #include <array>
 
 class Button; // forward declaration
+class Settings;
 
-enum MenuAction // used to tell what the button is supposed to do when clicked
+enum Action // used to tell what the button is supposed to do when clicked
 {
+    NONE,
+    // MAIN MENU ACTIONS
     PLAY,
     RULES,
     OPTIONS,
     EXIT,
-    NONE
+    // OPTIONS ACTIONS
+    DIFF,
+    DIR,
+    MUS,
+    EFF,
+    BACK
 };
 
 enum Direction // used during gameplay to help move things like the background and text
@@ -28,7 +36,15 @@ enum Direction // used during gameplay to help move things like the background a
     RIGHT,
     LEFT,
     UP,
-    DOWN
+    DOWN,
+    ALL
+};
+
+enum Difficulty
+{
+    EASY,
+    NORMAL,
+    HARD
 };
 
 /* 
@@ -57,10 +73,11 @@ void createAsset(T * l, std::string filePath)
 *  Outputs: n/a
 *  Preconditions: play was selected
 *  Date Created: 12/06/2020
-*  Date Last Modified: n/a
-*  Update Notes: n/a
+*  Date Last Modified: 12/08/2020
+*  Update Notes: added Settings in parameter list
+*  12/07/2020 - added hash table
 */
-void gamePlay(sf::RenderWindow &window, sf::Font &screenFont);
+void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings);
 
 /* 
 *  Function: updateComboCPS

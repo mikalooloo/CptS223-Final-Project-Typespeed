@@ -22,6 +22,17 @@ private:
 public:
     // ****************************CONSTRUCTORS****************************
     /* 
+    *  Function: MovingBackground default constructor
+    *  Description: created so this class can be used in another class
+    *  Inputs: n/a
+    *  Outputs: n/a
+    *  Preconditions: n/a
+    *  Date Created: 12/08/2020
+    *  Date Last Modified: n/a
+    *  Update Notes: n/a
+    */
+    MovingBackground();
+    /* 
     *  Function: MovingBackground explicit constructor
     *  Description: sets texture and sprite to texturePath, direction to d, and the other variables to 0
     *  Inputs: string texturePath, Direction D
@@ -133,8 +144,8 @@ public:
     *  Outputs: n/a
     *  Preconditions: n/a
     *  Date Created: 12/06/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/08/2020
+    *  Update Notes: added case ALL
     */
     void update(void);
 };

@@ -7,6 +7,8 @@
 #include "header.h"
 #include "Button.hpp"
 #include "MovingBackground.hpp"
+#include "Settings.hpp"
+#include "hash.h"
 
 #include <cmath> // for floor, for calculating cps
 
@@ -14,7 +16,7 @@
 #define ENTER 13
 #define SPACE 32
 
-void gamePlay(sf::RenderWindow &window, sf::Font &screenFont)
+void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings)
 {
     // *******BACKGROUND*******
     MovingBackground background("Images/BlackBackground.jpg",RIGHT);
@@ -50,6 +52,15 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont)
     int combo = 0;
 
     sf::Clock clock;
+
+    //********HASH TABLE*******
+    std::ifstream infile;
+    infile.open("Files/NormalWords.csv");
+    HashTable<std::string, int> *hash = new HashTable<std::string, int>(53); // size 53 because word count is 23 * 2 = 52 and next prime is 53
+    std::string word;
+    while (getline(infile, word, ',')) hash->insert(std::make_pair(word,0));
+    infile.close(); 
+
 
     // *******GAMEPLAY*******
     while (window.isOpen())

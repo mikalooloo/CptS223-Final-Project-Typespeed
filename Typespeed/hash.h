@@ -14,7 +14,8 @@ using std::pair;
 enum EntryState{
 	EMPTY = 0,
 	VALID = 1,
-	DELETED = 2
+	DELETED = 2,
+	ONSCREEN = 3
 };
 
 template<typename K, typename V> class HashTable{
@@ -200,11 +201,10 @@ void rehash(int n)
 	std::vector<hashobject> tempvect = linvector;
 	vectorsize = findNextPrime(n);
 
-	linvector.resize(vectorsize);
-	for(int i = 0; i < vectorsize; i++){
-		linvector[i].state = EMPTY;
-	}
 	linvector.clear();
+	linvector.resize(vectorsize);
+
+	for(int i = 0; i < vectorsize; i++) linvector[i].state = EMPTY;
 	numvalidelements = 0;
 
 	for(long unsigned int i = 0; i < tempvect.size(); ++i)
@@ -214,6 +214,14 @@ void rehash(int n)
 			insert(tempvect[i].entry);
 		}
 	}
+}
+
+void print_hash(void) 
+{
+    for (size_t i = 0; i < linvector.size(); ++i)
+    {
+        if (linvector.at(i).state == VALID) std::cout << linvector.at(i).entry.first << std::endl;
+    }
 }
 
 };
