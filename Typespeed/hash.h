@@ -8,6 +8,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <cstdlib> // for rand()
+
 using std::vector;
 using std::pair;
 
@@ -222,6 +224,20 @@ void print_hash(void)
     {
         if (linvector.at(i).state == VALID) std::cout << linvector.at(i).entry.first << std::endl;
     }
+}
+
+K& findRandom(void)
+{
+	int random = 0;
+	size_t v = 0;
+
+	do
+	{
+		random = rand() % vectorsize;
+		for (v = 0; v != random; ++v);
+	} while (linvector.at(v).state != VALID);
+
+	return linvector.at(v).entry.first;
 }
 
 };

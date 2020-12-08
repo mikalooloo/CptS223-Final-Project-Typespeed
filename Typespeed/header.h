@@ -79,6 +79,7 @@ void createAsset(T * l, std::string filePath)
 */
 void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings);
 
+void randomPlacement(std::string randomWord, std::vector<sf::Text> &wordVector, Direction d);
 /* 
 *  Function: updateComboCPS
 *  Description: updates the combo and CPS numbers based on whether or not the player entered a correct word (bool correct)
@@ -101,7 +102,7 @@ void updateComboCPS(bool correct, int &combo, sf::Text &comboNum, int &correctCh
 *  Date Last Modified: n/a
 *  Update Notes: n/a
 */
-void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array<Button *, 4> buttonArray, std::array<sf::Text *, 6> textArray);
+void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array<Button *, 4> &buttonArray, std::array<sf::Text *, 6> &textArray);
 
 /* 
 *  Function: loadGamePlay
@@ -113,7 +114,7 @@ void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array
 *  Date Last Modified: n/a
 *  Update Notes: n/a
 */
-void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> textArray);
+void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<sf::Text> &wordVector);
 
 #endif
 

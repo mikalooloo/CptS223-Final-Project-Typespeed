@@ -103,6 +103,7 @@ int main(int argc, char * argv[])
     // *******VARIABLES*******
     Settings settings(&optionsBArray, &optionsTArray);
     Action result = NONE;
+    srand(time(0));
 
     // *******GAME IS RUNNING*******
     while (window.isOpen())
