@@ -8,10 +8,31 @@
 #include "Button.hpp"
 #include "Settings.hpp"
 
+struct desktop
+{
+    unsigned int width;
+    unsigned int height;
+};
+
 int main(int argc, char * argv[])
 {
     // *******WINDOW AND BACKGROUND*******
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Typespeed");
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    //std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
+    //sf::RenderWindow window(desktop, "Typespeed");
+    //desktop desktop;
+    //desktop.width = 1366;
+    //desktop.height = 768;
+    sf::RenderWindow window(sf::VideoMode(desktop), "Typespeed");
+    window.setView(sf::View(sf::FloatRect(0,0,desktop.width-70,desktop.height-50)));
+    //sf::View view(sf::FloatRect(0,0,1920,1080));
+    //view.setViewport(sf::FloatRect(0,0,1,1));
+    //view.setSize(window.getSize().x,window.getSize().y);
+    //window.setView(view);
+
+    //window.create(sf::VideoMode(1366,768), "Typespeed");
+    //window.setView(view);
+
     sf::Texture backgroundTexture;
     createAsset<sf::Texture>(&backgroundTexture, "Images/VaporwaveBackground.png");
     sf::Sprite background(backgroundTexture);

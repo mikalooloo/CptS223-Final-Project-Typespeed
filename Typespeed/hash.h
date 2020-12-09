@@ -228,7 +228,7 @@ void print_hash(void)
 
 K& findRandom(void)
 {
-	int random = 0;
+	long unsigned int random = 0;
 	size_t v = 0;
 
 	do
