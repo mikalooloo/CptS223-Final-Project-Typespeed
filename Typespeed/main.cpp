@@ -17,23 +17,9 @@ struct desktop
 int main(int argc, char * argv[])
 {
     // *******WINDOW AND BACKGROUND*******
-    //sf::VideoMode desktop(1366,768);
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    //sf::VideoMode::getDesktopMode();
-    //std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-    //sf::RenderWindow window(desktop, "Typespeed");
-    //desktop desktop;
-    //desktop.width = 1366;
-    //desktop.height = 768;
     sf::RenderWindow window(sf::VideoMode(desktop), "Typespeed");
     window.setView(sf::View(sf::FloatRect(0,0,1850,900)));
-    //sf::View view(sf::FloatRect(0,0,1920,1080));
-    //view.setViewport(sf::FloatRect(0,0,1,1));
-    //view.setSize(window.getSize().x,window.getSize().y);
-    //window.setView(view);
-
-    //window.create(sf::VideoMode(1366,768), "Typespeed");
-    //window.setView(view);
 
     sf::Texture backgroundTexture;
     createAsset<sf::Texture>(&backgroundTexture, "Images/VaporwaveBackground.png");
