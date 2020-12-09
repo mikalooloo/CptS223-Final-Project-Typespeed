@@ -95,16 +95,16 @@ int size()
 	return numvalidelements;
 }
 
-V& at(const K& key)
+EntryState& at(const K& key)
 {
 	int index = bucket(key);
-	return linvector[index].entry.second;
+	return linvector[index].state;
 }
 
-V& operator[](const K& key)
+EntryState& operator[](const K& key)
 {
 	int index = bucket(key);
-	return linvector[index].entry.second;
+	return linvector[index].state;
 }
 
 int count(const K& key)
@@ -171,7 +171,7 @@ int bucket(const K& key)
 {
 	int index = hash(key);
 	int iterations = 0;
-	while(linvector[index].first != key && iterations != bucket_count()){
+	while(linvector[index].entry.first != key && iterations != bucket_count()){
 		if(index == bucket_count() - 1){
 			index = 0;
 		}
@@ -235,9 +235,15 @@ K& findRandom(void)
 	{
 		random = rand() % vectorsize;
 		for (v = 0; v != random; ++v);
-	} while (linvector.at(v).state != VALID);
+	} while (linvector.at(v).state != VALID || linvector.at(v).state == ONSCREEN);
 
+	linvector.at(v).state = ONSCREEN;
 	return linvector.at(v).entry.first;
+}
+
+void setState(const K& key, EntryState s)
+{
+	linvector[bucket(key)].state = s;
 }
 
 };

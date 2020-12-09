@@ -14,6 +14,7 @@
 
 class Button; // forward declaration
 class Settings;
+template<typename K, typename V>class HashTable;
 
 enum Action // used to tell what the button is supposed to do when clicked
 {
@@ -79,7 +80,9 @@ void createAsset(T * l, std::string filePath)
 */
 void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings);
 
-void randomPlacement(std::string randomWord, std::vector<sf::Text> &wordVector, Direction d);
+void addNewWord(HashTable<std::string, int> *hash, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d);
+void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d);
+void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, int speed);
 /* 
 *  Function: updateComboCPS
 *  Description: updates the combo and CPS numbers based on whether or not the player entered a correct word (bool correct)
@@ -114,7 +117,7 @@ void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array
 *  Date Last Modified: n/a
 *  Update Notes: n/a
 */
-void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<sf::Text> &wordVector);
+void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector);
 
 #endif
 

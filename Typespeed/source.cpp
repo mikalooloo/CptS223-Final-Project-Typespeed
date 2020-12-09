@@ -42,17 +42,12 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 
     std::array<sf::Text *, 5> textArray = { &playerText, &cpsText, &cpsNum, &comboText, &comboNum };
 
-    int limit;
-    if (settings.getDifficulty() == EASY) limit = 4;
-    else if (settings.getDifficulty() == NORMAL) limit = 5;
-    else limit = 6;
+    std::vector<std::pair<sf::Text, Direction>> wordVector;
 
-    std::vector<sf::Text> wordVector;
-
-    for (int i = 0; i < limit; ++i)
+    for (int i = 0; i < 15; ++i) // makes 10 words so max 10 words on screen at a time
     {
         sf::Text word("",wordFont,30);
-        wordVector.push_back(word);
+        wordVector.push_back(std::make_pair(word,RIGHT));
     }
 
     // *******VARIABLES*******
@@ -65,23 +60,40 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     double cps = 0.0;
     std::string cpsString = ""; // used to shorten string to one decimal place
     int combo = 0;
+    bool correct = false;
 
     sf::Clock clock;
-    sf::Time time;
+    sf::Clock overallTime;
     int seconds; // every this many seconds, a new word appears on the screen
-    if (settings.getDifficulty() == EASY) seconds = 3; // temporary, for testing
-    else if (settings.getDifficulty() == NORMAL) seconds = 6;
-    else seconds = 3;
+    int speed; // how fast the words go
+    int onscreen = 0;
+    if (settings.getDifficulty() == EASY) 
+    {
+        seconds = 6; // temporary, for testing
+        speed = 0.5;
+    }
+    else if (settings.getDifficulty() == NORMAL) 
+    {
+        seconds = 4;
+        speed = 1;
+    }
+    else 
+    {
+        seconds = 2;
+        speed = 1.5;
+    }
+
 
     //********HASH TABLE*******
     std::ifstream infile;
     infile.open("Files/NormalWords.csv");
     HashTable<std::string, int> *hash = new HashTable<std::string, int>(53); // size 53 because word count is 23 * 2 = 52 and next prime is 53
     std::string word;
-    while (getline(infile, word, ',')) hash->insert(std::make_pair(word,0));
+    while (getline(infile, word, ',')) hash->insert(std::make_pair(word,1));
     infile.close(); 
 
-    time = clock.restart();
+    overallTime.restart();
+    clock.restart();
     // *******GAMEPLAY*******
     while (window.isOpen())
     {
@@ -99,6 +111,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
                         break;
                     case ENTER: // if enter, save the string to check validity and clear the screen
                         playerKey = playerInput;
+                        for (long unsigned int i = 0; i < playerKey.length(); ++i) playerKey[i] = toupper(playerKey[i]);
                         playerInput.clear();
                         break;
                     default: // if neither of those, it's a character, so display it on the screen (up to 15 characters limit)
@@ -111,71 +124,140 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 
         }
 
-        if (clock.getElapsedTime().asSeconds() - time.asSeconds() > seconds) // if this is true, then we need to add a new word
+        if (clock.getElapsedTime().asSeconds() > seconds && onscreen < 14) // if this is true, then we need to add a new word
         {
-            randomWord = hash->findRandom(); // finds a random word - needs to check if its onscreen already or not
-            randomPlacement(randomWord, wordVector, settings.getDirection()); // puts it in a random placement
-            time = clock.restart();
+            ++onscreen;
+            addNewWord(hash,wordVector,settings.getDirection());
+            if (settings.getDifficulty() == HARD || settings.getDifficulty() == NORMAL) // if it's on hard or normal, add another word at the same time
+            {
+                addNewWord(hash,wordVector,settings.getDirection());
+            }
+            clock.restart();
         } 
         // search hash table for playerKey if playerKey is not "", add character # to correct cps if it was found and is on the screen, remove from onscreen
         // also add one to combo if it's correct, set to 0 if not
 
-        if (playerKey != "") updateComboCPS(true,combo,comboNum,correctCharacters,cps,cpsString,cpsNum,clock,playerKey);
+        if (playerKey != "") 
+        {
+            if (hash->at(playerKey) == ONSCREEN)
+            {
+                hash->setState(playerKey, VALID);
+                --onscreen;
+                correct = true;
+                for (auto & v : wordVector)
+                {
+                    if (v.first.getString() == playerKey)
+                    {
+                        v.first.setString("");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                correct = false;
+            }
             
+            updateComboCPS(correct,combo,comboNum,correctCharacters,cps,cpsString,cpsNum,overallTime,playerKey);
+            if (settings.getDifficulty() == HARD && combo >= 10) speed = 1.75;
+        }
+            
+        updateWords(wordVector, speed);
         background.update();
 
         loadGamePlay(&window, background.getSprite(), textArray, wordVector);
     }
 
-    //for (int i = 0; i < wordVector.size(); ++i)
-    //{
-        //delete wordVector[i];
-    //}
 }
 
-void randomPlacement(std::string randomWord, std::vector<sf::Text> &wordVector, Direction d)
+void addNewWord(HashTable<std::string, int> *hash, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d)
+{
+    std::string randomWord = hash->findRandom(); // finds a random word - needs to check if its onscreen already or not
+    randomPlacement(randomWord, wordVector, d); // puts it in a random placement
+}
+
+void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d)
 {
     sf::Vector2f randomXY(0.f,0.f);
     long unsigned int i = 0;
+    bool notoverlapping = true;
 
-    if (d == ALL) // if all directions, pick a random one
+    if (d == ALL) // if it can come from all directions,
     {
-        int random = rand() % 4;
-        d = (Direction)random;
+        int random = rand() % 4; // pick a direction randomly
+        d = (Direction)random;      
     }
 
-    switch (d)
+    do
+    {  
+        switch (d)
+        {
+            case RIGHT: // if going to the right (coming from the left)
+                randomXY.x = -100.f;
+                randomXY.y = rand() % 700 + 5;
+                break;
+            case LEFT: // if going to the left (coming from the right)
+                randomXY.x = 1840.f;
+                randomXY.y = rand() % 700 + 5;
+                break;
+            case UP: // if going up (coming from below)
+                randomXY.x = rand() % 1700;
+                randomXY.y = 870.f;
+                break;
+            case DOWN: // if going down (coming from above)
+                randomXY.x = rand() % 800 + 5;
+                randomXY.y = -50.f;
+                break;
+            default:
+                break;
+        }
+
+    if (notoverlapping)
     {
-        case RIGHT: // if going to the right (coming from the left)
-            randomXY.x = -20.f;
-            randomXY.y = rand() % 700 + 5;
-            for (i = 0; wordVector.at(i).getString() != ""; ++i); // this finds the next empty wordVector slot
-            wordVector.at(i).setString(randomWord);
-            wordVector.at(i).setPosition(randomXY);
-            break;
-        case LEFT: // if going to the left (coming from the right)
-            randomXY.x = 1840.f;
-            randomXY.y = rand() % 700 + 5;
-            for (i = 0; wordVector.at(i).getString() != ""; ++i);
-            wordVector.at(i).setString(randomWord);
-            wordVector.at(i).setPosition(randomXY);
-            break;
-        case UP: // if going up (coming from below)
-            randomXY.x = rand() % 1840;
-            randomXY.y = 870.f;
-            for (i = 0; wordVector.at(i).getString() != ""; ++i);
-            wordVector.at(i).setString(randomWord);
-            wordVector.at(i).setPosition(randomXY);
-            break;
-        case DOWN: // if going down (coming from above)
-            randomXY.x = rand() % 1080 + 5;
-            randomXY.y = -20.f;
-            for (i = 0; wordVector.at(i).getString() != ""; ++i);
-            wordVector.at(i).setString(randomWord);
-            wordVector.at(i).setPosition(randomXY);
-            break;
-        default:
-            break;
+        for (i = 0; wordVector.at(i).first.getString() != ""; ++i); // this finds the next empty wordVector slot
+        wordVector.at(i).first.setString(randomWord);
+        wordVector.at(i).second = d;
+    }
+
+    wordVector.at(i).first.setPosition(randomXY);
+
+    for (long unsigned int v = 0; v < wordVector.size(); ++v)
+    {
+        if (wordVector.at(v).first.getString() != "")
+        {
+            if (wordVector.at(v).first.getLocalBounds().intersects(wordVector.at(i).first.getLocalBounds()))
+            {
+                notoverlapping = false;
+            }
+        }
+    }
+    } while (notoverlapping);
+}
+
+void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, int speed)
+{
+    for (long unsigned int i = 0; i < wordVector.size(); ++i)
+    {
+        if (wordVector[i].first.getString() != "")
+        {
+            switch (wordVector[i].second)
+            {
+                case RIGHT:
+                    wordVector[i].first.move(speed, 0);
+                    break;
+                case LEFT:
+                    wordVector[i].first.move(-speed, 0);
+                    break;
+                case UP:
+                    wordVector[i].first.move(0, -speed);
+                    break;
+                case DOWN:
+                    wordVector[i].first.move(0, speed);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 
@@ -221,7 +303,7 @@ void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array
     window->display();
 }
 
-void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<sf::Text> &wordVector)
+void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector)
 {
     window->clear();
     window->draw(*background);
@@ -232,7 +314,7 @@ void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array
 
     for (long unsigned int i = 0; i < wordVector.size(); ++i)
     {
-        if (wordVector.at(i).getString() != "") window->draw(wordVector[i]);
+        if (wordVector.at(i).first.getString() != "") window->draw(wordVector[i].first);
     }
 
     window->display();
