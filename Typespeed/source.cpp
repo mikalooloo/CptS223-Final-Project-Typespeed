@@ -3,6 +3,9 @@
 * Mikaela Dean and Sierra Svetlik
 * 12/11/2020
 * source.cpp
+*
+* Gameplay Music Credit to:
+* https://patrickdearteaga.com
 */
 #include "header.h"
 #include "Button.hpp"
@@ -20,6 +23,33 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 {
     // *******BACKGROUND*******
     MovingBackground background("Images/BlackBackground.jpg",settings.getDirection());
+
+    // *******MUSIC AND SOUNDS*******
+    sf::Music gamePlayMusic;
+    if (!gamePlayMusic.openFromFile("Music/Intergalactic Odyssey.ogg")) throw std::runtime_error("Music failed to load");
+    sf::Music gameOverMusic;
+    if (!gameOverMusic.openFromFile("Music/I Miss You.ogg")) throw std::runtime_error("Music failed to load");
+
+    if (settings.getMusic()) gamePlayMusic.play();
+    gamePlayMusic.setVolume(50.f);
+    gamePlayMusic.setLoop(true);
+    gameOverMusic.setVolume(50.f);
+    gameOverMusic.setLoop(true);
+
+    sf::SoundBuffer correctWordBuffer;
+    if (!correctWordBuffer.loadFromFile("Music/CorrectWordSound.wav")) throw std::runtime_error("Sound failed to load");
+    sf::SoundBuffer wrongWordBuffer;
+    if (!wrongWordBuffer.loadFromFile("Music/WrongWordSound.wav")) throw std::runtime_error("Sound failed to load");
+    sf::SoundBuffer lostComboBuffer;
+    if (!lostComboBuffer.loadFromFile("Music/LostComboSound.wav")) throw std::runtime_error("Sound failed to load");
+    sf::SoundBuffer lostLifeBuffer;
+    if (!lostLifeBuffer.loadFromFile("Music/LostLifeSound.wav")) throw std::runtime_error("Sound failed to load");
+
+    sf::Sound correctWord(correctWordBuffer);
+    sf::Sound wrongWord(wrongWordBuffer);
+    sf::Sound lostCombo(lostComboBuffer);
+    sf::Sound lostLife(lostLifeBuffer);
+
 
     // *******FONTS AND TEXT*******
     sf::Font playerFont;
@@ -143,7 +173,6 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         speed = 1;
     }
 
-
     //********HASH TABLE*******
     std::ifstream infile;
     infile.open("Files/Words.csv");
@@ -153,6 +182,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     infile.close(); 
 
     overallTime.restart(); // restarting to get a more accurate time
+
     // *******GAMEPLAY*******
     while (window.isOpen())
     {
@@ -193,6 +223,9 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         if (!gameover) // while gameover is false, run the gameplay
         {
         
+        if (settings.getMusic() && gamePlayMusic.getStatus() == sf::SoundSource::Paused) gamePlayMusic.play();
+        else if (!settings.getMusic() && gamePlayMusic.getStatus() == sf::SoundSource::Playing) gamePlayMusic.pause();
+
         if (clock.getElapsedTime().asSeconds() > seconds && onscreen < 14) // if this is true, then we need to add a new word
         {
             ++onscreen;
@@ -209,6 +242,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         {
             if (hash->at(playerKey) == ONSCREEN) // if what the player entered is actually ONSCREEN
             {
+                if (settings.getSoundEffects()) correctWord.play();
                 hash->setState(playerKey, VALID);
                 --onscreen;
                 correct = true;
@@ -225,6 +259,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
             }
             else // if not found in the hash table,
             {
+                if (settings.getSoundEffects()) wrongWord.play();
                 correct = false;
             }
             
@@ -236,6 +271,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         outofbounds = updateWords(wordVector, speed);
         if (outofbounds != 0) // this means at least 1 word went out of the bounds
         {
+            if (settings.getSoundEffects()) lostLife.play();
             lives -= outofbounds; // remove a life for each word out of bounds
             updateLifeTracker(lifeArray, deadArray, outofbounds); // update the visual life tracker
             if (highestCombo < combo) highestCombo = combo;
@@ -256,6 +292,11 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 
             if (endTime.asSeconds() == 0) // if 0, then this is the first time in the game over screen, let's adjust some values
             {
+                if (settings.getMusic())
+                {
+                    if (gamePlayMusic.getStatus() == sf::SoundSource::Playing) gamePlayMusic.stop();
+                    gameOverMusic.play();
+                }
                 endTime = overallTime.restart(); // save final time
                 shortenString = std::to_string(endTime.asSeconds());
                 shortenString.erase(shortenString.begin()+4,shortenString.end()); // shortens the decimal

@@ -3,6 +3,14 @@
 * Mikaela Dean and Sierra Svetlik
 * 12/11/2020
 * main.cpp
+* 
+* Gameplay Music Credit to:
+* https://patrickdearteaga.com
+*
+* Sorry about the lag, the only way I was thinking to fix it was to 
+* fix the timestep but it seemed too complicated for how much time
+* I set aside to do this before the due date and I didn't think the lag was too unbearable
+*
 */
 #include "header.h"
 #include "Button.hpp"
@@ -108,6 +116,8 @@ int main(int argc, char * argv[])
     sf::Music mainMenuMusic;
     if (!mainMenuMusic.openFromFile("Music/Great Little Challenge.ogg")) throw std::runtime_error("Music failed to load");
     mainMenuMusic.play();
+    mainMenuMusic.setLoop(true);
+    double musicVolume = 100;
 
     // *******VARIABLES*******
     Settings settings(&optionsBArray, &optionsTArray);
@@ -126,6 +136,12 @@ int main(int argc, char * argv[])
 
         if (settings.getMusic() && mainMenuMusic.getStatus() == sf::SoundSource::Paused) mainMenuMusic.play();
         else if (!settings.getMusic() && mainMenuMusic.getStatus() == sf::SoundSource::Playing) mainMenuMusic.pause();
+
+        if (settings.getMusic() && mainMenuMusic.getVolume() < 100)
+        {
+            mainMenuMusic.setVolume(musicVolume);
+            musicVolume += 20;
+        }
 
         // *******MOUSE POSITIONING*******
         if (result == NONE) // if currently in main menu, check to see where the mouse is
@@ -154,10 +170,30 @@ int main(int argc, char * argv[])
         switch (result) // currently all this does is puts up text that says it's loading the blank
         {
             case PLAY: 
-                if(playbutton.getClickState() == CLICKED) text.setString("Loading the gameplay...");
-                playbutton.setClickState(NORMALB);
-                // COMBO TRACKER and sound effects
+                if (settings.getMusic())
+                {
+                    text.setString("Loading the gameplay...");
+                    playbutton.setClickState(NORMALB);
+
+                    window.clear();
+                    window.draw(text);
+                    window.display();
+
+                    musicVolume = 100;
+                    for (int i = 0; i < 4; ++i) // added this to make the musical transition more bearable
+                    {
+                        musicVolume -= 20;
+                        mainMenuMusic.setVolume(musicVolume);
+                        sf::sleep(sf::milliseconds(500));
+                    }
+                    mainMenuMusic.stop();
+                }
                 gamePlay(window, font, settings);
+                if (settings.getMusic()) 
+                {
+                    mainMenuMusic.play();
+                    musicVolume = 20;
+                }
                 result = NONE;
                 break;
 
