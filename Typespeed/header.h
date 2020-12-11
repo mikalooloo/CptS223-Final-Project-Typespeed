@@ -74,15 +74,46 @@ void createAsset(T * l, std::string filePath)
 *  Outputs: n/a
 *  Preconditions: play was selected
 *  Date Created: 12/06/2020
-*  Date Last Modified: 12/08/2020
-*  Update Notes: added Settings in parameter list
+*  Date Last Modified: 12/09/2020
+*  Update Notes: added word functionality
+*  12/08/2020 - added Settings in parameter list
 *  12/07/2020 - added hash table
 */
 void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings);
 
+/* 
+*  Function: addNewWord
+*  Description: uses the hash's findRandomWord function then calls randomPlacement(), to generate a new random word and its random placement
+*  Inputs: HashTable * hash, vector<Text, Direction> wordVector, Direction d
+*  Outputs: n/a
+*  Preconditions: a new word needs to be added onscreen
+*  Date Created: 12/09/2020
+*  Date Last Modified: n/a
+*  Update Notes: n/a
+*/
 void addNewWord(HashTable<std::string, int> *hash, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d);
+/* 
+*  Function: randomPlacement
+*  Description: picks a random placement to go in the Direction d, adds it to the wordVector and ensures it's not going to overlap another word
+*  Inputs: string randomWord, vector<Text, Direction> wordVector, Direction d
+*  Outputs: n/a
+*  Preconditions: a new word is being added (addNewWord)
+*  Date Created: 12/09/2020
+*  Date Last Modified: n/a
+*  Update Notes: n/a
+*/
 void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Direction>> &wordVector, Direction d);
-void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, int speed);
+/* 
+*  Function: updateWords
+*  Description: updates the position of each word dependent on the direction they're going (moves it at speed speed)
+*  Inputs: vector<Text, Direction> wordVector, double speed
+*  Outputs: n/a
+*  Preconditions: n/a
+*  Date Created: 12/09/2020
+*  Date Last Modified: 12/10/2020
+*  Update Notes: changed speed from an int to double
+*/
+void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed);
 /* 
 *  Function: updateComboCPS
 *  Description: updates the combo and CPS numbers based on whether or not the player entered a correct word (bool correct)
