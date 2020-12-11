@@ -102,7 +102,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     }
 
     // *******VARIABLES*******
-    bool gameover = true;
+    bool gameover = false;
     bool clicked; // for end of game, to see if a button has been clicked
     Action result = NONE; // for end of game, to see if a button has been clicked and if so what to do
 
@@ -146,8 +146,8 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 
     //********HASH TABLE*******
     std::ifstream infile;
-    infile.open("Files/NormalWords.csv");
-    HashTable<std::string, int> *hash = new HashTable<std::string, int>(53); // size 53 because word count is 23 * 2 = 52 and next prime is 53
+    infile.open("Files/Words.csv");
+    HashTable<std::string, int> *hash = new HashTable<std::string, int>(211); // size 211 because word count is 200* 2 = 200 and next prime is 211
     std::string word;
     while (getline(infile, word, ',')) hash->insert(std::make_pair(word,1));
     infile.close(); 
