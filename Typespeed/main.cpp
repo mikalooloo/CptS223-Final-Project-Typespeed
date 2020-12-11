@@ -111,6 +111,7 @@ int main(int argc, char * argv[])
 
     // *******VARIABLES*******
     Settings settings(&optionsBArray, &optionsTArray);
+    bool clicked;
     Action result = NONE;
     srand(time(0));
 
@@ -130,37 +131,23 @@ int main(int argc, char * argv[])
         if (result == NONE) // if currently in main menu, check to see where the mouse is
         {
             auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) // is something being clicked?
+            clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
+            
+            // if yes, check if it was a button that was clicked, otherwise check for hovering
+            for (long unsigned int i = 0; i < buttonArray.size() && result == NONE; ++i)
             {
-                // then check if it was a button that was clicked
-                for (long unsigned int i = 0; i < buttonArray.size() && result == NONE; ++i)
-                {
-                    result = buttonArray[i]->checkClick(translated_pos, true);
-                }
+                result = buttonArray[i]->checkClick(translated_pos, clicked);
+            }
 
-            }
-            else // otherwise, checking for hovering!
-            {
-                for (long unsigned int i = 0; i < buttonArray.size(); ++i)
-                {
-                    buttonArray[i]->checkClick(translated_pos, false);
-                }
-            }
         }
         else if (result == OPTIONS) // if currently in options, check to see where the mouse is
         {
             auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) // is something being clicked?
-            {
-                // then check if it was a button that was clicked
-                // if settings.checkButtons() returns OPTIONS, then none of the buttons were clicked
-                result = settings.checkButtons(true, translated_pos);
-
-            }
-            else // otherwise, checking for hovering!
-            {
-                settings.checkButtons(false, translated_pos);
-            }
+            clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
+            
+            // if yes, check if it was a button that was clicked, otherwise check for hovering
+            // if settings.checkButtons() returns OPTIONS, then none of the buttons were clicked
+            result = settings.checkButtons(translated_pos, clicked);
         }
 
         // *******MAIN MENU and BUTTONS*******
@@ -171,6 +158,7 @@ int main(int argc, char * argv[])
                 playbutton.setClickState(NORMALB);
                 // COMBO TRACKER and sound effects
                 gamePlay(window, font, settings);
+                result = NONE;
                 break;
 
             case RULES:
@@ -185,17 +173,7 @@ int main(int argc, char * argv[])
             case OPTIONS: case DIFF: case DIR: case MUS: case EFF:
                 optionsbutton.setClickState(NORMALB);
 
-                /* options: the option in () is the default option
-                -gameplay options
-                difficulty: (easy) - normal - hard
-                text direction: (right) - left - up - down - all (automatically locks onto all if difficulty is set to hard)
-                //word bank: remove - add - list (can remove, add, or see all of the words in any difficulty)
-                -sound options
-                music: (on) - off
-                sound effects: (on) - off
-                */
                 result = settings.nextButton(result);
-
                 settings.displayOptions(&window);
                 break;
             case EXIT:

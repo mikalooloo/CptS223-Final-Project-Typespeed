@@ -23,13 +23,13 @@ enum Action // used to tell what the button is supposed to do when clicked
     PLAY,
     RULES,
     OPTIONS,
-    EXIT,
+    EXIT, // ALSO USED IN GAMEPLAY TO EXIT
     // OPTIONS ACTIONS
     DIFF,
     DIR,
     MUS,
     EFF,
-    BACK
+    BACK // ALSO USED IN GAMEPLAY TO RETURN TO MAIN MENU
 };
 
 enum Direction // used during gameplay to help move things like the background and text
@@ -114,6 +114,16 @@ void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Dir
 *  Update Notes: changed speed from an int to double, changed return type from void to int
 */
 int updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed);
+/* 
+*  Function: updateLifeTracker
+*  Description: for every life lost, it dulls one of the sprites in the lifeArray by replacing it with one in the deadArray
+*  Inputs: Sprite * lifeArray[3], Sprite * deadArray[3], int liveslost (how many to dull)
+*  Outputs: n/a
+*  Preconditions: at least one life has been lost (but will run fine if liveslost is 0)
+*  Date Created: 12/10/2020
+*  Date Last Modified: n/a
+*  Update Notes: n/a
+*/
 void updateLifeTracker(std::array<sf::Sprite *, 3> &lifeArray, std::array<sf::Sprite *, 3> &deadArray, int liveslost);
 /* 
 *  Function: updateComboCPS
@@ -128,15 +138,26 @@ void updateLifeTracker(std::array<sf::Sprite *, 3> &lifeArray, std::array<sf::Sp
 void updateComboCPS(bool correct, int &combo, int &highestCombo, sf::Text &comboNum, int &correctCharacters, double &cps, std::string &cpsString, sf::Text &cpsNum, sf::Clock &clock, std::string &playerKey);
 /* 
 *  Function: increaseDifficulty
-*  Description: 
-*  Inputs:
-*  Outputs:
-*  Preconditions:
-*  Date Created: 
-*  Date Last Modified: 
-*  Update Notes: 
+*  Description: increases the speed of the words by 0.01 for every word typed correctly
+*  Inputs: double speed
+*  Outputs: n/a
+*  Preconditions: a word has been typed correctly
+*  Date Created: 12/10/2020
+*  Date Last Modified: n/a
+*  Update Notes: n/a
 */
-void increaseDifficulty(sf::Time seconds, double &speed, int &speedincreases);
+void increaseDifficulty(double &speed);
+/* 
+*  Function: randomTaunt
+*  Description: picks a random taunt for the game over screen
+*  Inputs: Text taunt
+*  Outputs: n/a
+*  Preconditions: n/a
+*  Date Created: 12/10/2020
+*  Date Last Modified: n/a
+*  Update Notes: n/a
+*/
+void randomTaunt(sf::Text &taunt);
 /* 
 *  Function: loadMainMenu
 *  Description: clears the window, draws background, all buttons and text, displays window for main menu

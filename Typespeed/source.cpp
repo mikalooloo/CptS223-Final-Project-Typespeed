@@ -40,16 +40,42 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     sf::Text comboNum("0", wordFont, 35);
     comboNum.setPosition(1649.f, 740.f);
 
+    // **FOR DISPLAYING DURING GAMEPLAY**
     std::array<sf::Text *, 5> textArray = { &playerText, &cpsText, &cpsNum, &comboText, &comboNum };
 
     std::vector<std::pair<sf::Text, Direction>> wordVector;
 
-    for (int i = 0; i < 15; ++i) // makes 10 words so max 10 words on screen at a time
+    for (int i = 0; i < 15; ++i) // makes 15 words so max 15 words on screen at a time
     {
         sf::Text word("",wordFont,30);
         wordVector.push_back(std::make_pair(word,RIGHT));
     }
 
+    // **FOR DISPLAYING END GAME**
+    sf::RectangleShape rectangle(sf::Vector2f(800.f,700.f)); // background rectangle
+    rectangle.setFillColor(sf::Color::Black);
+    rectangle.setOutlineColor(sf::Color::White);
+    rectangle.setOutlineThickness(2);
+    rectangle.setPosition(525.f,100.f);
+    sf::RectangleShape comboRectangle(sf::Vector2f(250.f,150.f)); // behind the combo display
+    comboRectangle.setFillColor(sf::Color::Black);
+    comboRectangle.setOutlineColor(sf::Color::Magenta);
+    comboRectangle.setOutlineThickness(3);
+    comboRectangle.setPosition(800.f,345.f);
+
+    sf::Text gameOver("Game Over", screenFont, 50);
+    gameOver.setPosition(755.f, 150.f);
+    sf::Text taunt("", wordFont, 25);
+    randomTaunt(taunt);
+    sf::Text timeLastedText("Time", screenFont, 35);
+    timeLastedText.setPosition(600.f,325.f);
+    sf::Text timeLastedNum("0", wordFont, 35);
+    timeLastedNum.setPosition(605.f,380.f);
+
+    Button mainMenuButton("Images/ReturnButtonNormal.png","Images/ReturnButtonHover.png",BACK,sf::Vector2f(680.f,570.f));
+    Button exitButton("Images/LeaveButtonNormal.png","Images/LeaveButtonHover.png",EXIT,sf::Vector2f(800.f,670.f));
+
+    // *******LIFE TRACKER*******
     sf::Texture lifeATexture;
     createAsset<sf::Texture>(&lifeATexture, "Images/StarLifeAlive.png");
     sf::Texture lifeDTexture;
@@ -66,9 +92,9 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     std::array<sf::Sprite *, 3> deadArray = { &lifeD1, &lifeD2, &lifeD3 };
 
     float pos1 = 1550.f;
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i) // for each sprite
     {
-        lifeArray[i]->setScale(0.25, 0.25);
+        lifeArray[i]->setScale(0.25, 0.25); 
         deadArray[i]->setScale(0.25, 0.25);
         lifeArray[i]->setPosition(pos1, 25.f);
         deadArray[i]->setPosition(pos1, 25.f);
@@ -76,31 +102,35 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     }
 
     // *******VARIABLES*******
-    bool gameover = false;
-    sf::String playerInput; // used to read playerInput
+    bool gameover = true;
+    bool clicked; // for end of game, to see if a button has been clicked
+    Action result = NONE; // for end of game, to see if a button has been clicked and if so what to do
+
+    sf::String playerInput; // used to read player input during gameplay
     std::string playerKey = ""; // used to search hash table and helps keep track of # of correct characters
     std::string randomWord = "";
 
     int correctCharacters = 0; 
     double cps = 0.0; // correct characters per second
-    std::string cpsString = ""; // used to shorten string to one decimal place
+    std::string shortenString = ""; // used to shorten string to a certain decimal place (like cps)
     int highestCombo = 0;
     int combo = 0;
     bool correct = false; // if what the player typed was correct or not
 
     sf::Clock clock;
     sf::Clock overallTime;
+    sf::Time endTime = sf::seconds(0);
     int seconds; // every this many seconds, a new word appears on the screen
     double speed; // how fast the words go
-    int speedincreases = 0; // how many times the speed has been increased during gameplay
+
     int onscreen = 0; // how many words are onscreen
     int outofbounds = 0; // how many words became out of bounds and were removed
     int lives = 3; // how many lives the player has (once it reaches 0 the game ends)
 
     if (settings.getDifficulty() == EASY) 
     {
-        seconds = 6; 
-        speed = 0.5;
+        seconds = 6; // the higher this number is, the easier it is
+        speed = 0.5; // the lower this number is, the easier it is
     }
     else if (settings.getDifficulty() == NORMAL) 
     {
@@ -122,8 +152,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     while (getline(infile, word, ',')) hash->insert(std::make_pair(word,1));
     infile.close(); 
 
-    overallTime.restart();
-    clock.restart();
+    overallTime.restart(); // restarting to get a more accurate time
     // *******GAMEPLAY*******
     while (window.isOpen())
     {
@@ -132,7 +161,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         {
             if (event.type == sf::Event::Closed) window.close();
 
-            if (event.type == sf::Event::TextEntered) // if player is typing
+            if (event.type == sf::Event::TextEntered && !gameover) // if player is typing during the game
             {
                 switch (event.text.unicode)
                 {
@@ -152,16 +181,23 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
                 playerText.setString(playerInput);
             }
 
+            // **CHECKING IF SOMETHING WAS CLICKED**
+            auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
+            // if so check which button if any was clicked, otherwise check for hovering
+            result = mainMenuButton.checkClick(translated_pos, clicked);
+            if (result == NONE) result = exitButton.checkClick(translated_pos, clicked);
+            
         }
 
-        if (!gameover)
+        if (!gameover) // while gameover is false, run the gameplay
         {
         
         if (clock.getElapsedTime().asSeconds() > seconds && onscreen < 14) // if this is true, then we need to add a new word
         {
             ++onscreen;
             addNewWord(hash,wordVector,settings.getDirection());
-            // if it's hard or it's normal and they have at least a combo of 10
+            // if it's hard or it's normal and they have at least a combo of 10, add another word
             if (onscreen < 13 && (settings.getDifficulty() == HARD || (settings.getDifficulty() == NORMAL && combo > 10)))
             {
                 addNewWord(hash,wordVector,settings.getDirection());
@@ -176,7 +212,7 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
                 hash->setState(playerKey, VALID);
                 --onscreen;
                 correct = true;
-                for (auto & v : wordVector)
+                for (auto & v : wordVector) // reset the word in the wordVector so it stops printing it out
                 {
                     if (v.first.getString() == playerKey)
                     {
@@ -184,17 +220,19 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
                         break;
                     }
                 }
+
+                increaseDifficulty(speed);
             }
-            else
+            else // if not found in the hash table,
             {
                 correct = false;
             }
             
-            updateComboCPS(correct,combo,highestCombo,comboNum,correctCharacters,cps,cpsString,cpsNum,overallTime,playerKey);
+            // if correct is true, adds to their combo and cps, if it's false then reset combo 
+            updateComboCPS(correct,combo,highestCombo,comboNum,correctCharacters,cps,shortenString,cpsNum,overallTime,playerKey);
         }
         
-        
-        increaseDifficulty(overallTime.getElapsedTime(), speed, speedincreases);
+        // updateWords updates the location of each word, and it returns how many become out of bounds (and erases those out of bound words from the vector)
         outofbounds = updateWords(wordVector, speed);
         if (outofbounds != 0) // this means at least 1 word went out of the bounds
         {
@@ -204,17 +242,76 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
             combo = 0; // reset combo
             comboNum.setString(std::to_string(combo));
             onscreen -= outofbounds; 
-            outofbounds = 0;
+            outofbounds = 0; // reset
         }
+
         // check if game is over!
         if (lives < 1) gameover = true;
 
         background.update();
         loadGamePlay(&window, background.getSprite(), textArray, wordVector, lifeArray);
         } 
-        else
+        else // this means gameplay is over, now the game over screen!
         {
-            // put game over screen here and allow to return to main menu
+
+            if (endTime.asSeconds() == 0) // if 0, then this is the first time in the game over screen, let's adjust some values
+            {
+                endTime = overallTime.restart(); // save final time
+                shortenString = std::to_string(endTime.asSeconds());
+                shortenString.erase(shortenString.begin()+4,shortenString.end()); // shortens the decimal
+                timeLastedNum.setString(shortenString);
+
+                // sets up the game over screen correctly, reusing some text used during gameplay
+                cpsText.setCharacterSize(35);
+                cpsText.setPosition(1160.f,325.f);
+                cpsNum.setCharacterSize(35);
+                cpsNum.setPosition(1165.f,380.f); 
+                comboText.setCharacterSize(40);
+                comboText.setPosition(840.f,355.f);
+                comboNum.setCharacterSize(40);
+                comboNum.setString(std::to_string(highestCombo));
+                if (highestCombo < 9) comboNum.setPosition(910.f,410.f); // this way the combo looks nice
+                else comboNum.setPosition(900.f,410.f); // and centered no matter if it's 2 digits or 1
+            }
+
+
+            switch (result) // based on what button is clicked
+            {
+                case BACK: // go back to Main Menu
+                    return;
+                    break;
+                case EXIT: // exit the game
+                    window.close();
+                    break;
+                default:
+                    break;
+            }
+
+            // *******DISPLAYING GAME OVER*******
+            window.clear();
+
+            // backgrounds
+            window.draw(*background.getSprite());
+            window.draw(rectangle);
+            window.draw(comboRectangle);
+
+            // top titles
+            window.draw(gameOver);
+            window.draw(taunt);
+
+            // scores
+            window.draw(timeLastedText);
+            window.draw(timeLastedNum);
+            window.draw(cpsText);
+            window.draw(cpsNum);
+            window.draw(comboText);
+            window.draw(comboNum);
+
+            // buttons
+            window.draw(mainMenuButton.getSprite());
+            window.draw(exitButton.getSprite());
+            
+            window.display();
         }
         
     }
@@ -304,36 +401,36 @@ int updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double 
                 case RIGHT:
                     wordVector[i].first.move(speed, 0);
 
-                    if (wordVector[i].first.getGlobalBounds().left > 1845.f)
+                    if (wordVector[i].first.getGlobalBounds().left > 1845.f) // if out of bounds
                     {
                         ++outofbounds;
-                        wordVector[i].first.setString("");
+                        wordVector[i].first.setString(""); // erase
                     }
                     break;
                 case LEFT:
                     wordVector[i].first.move(-speed, 0);
 
-                    if (wordVector[i].first.getGlobalBounds().left + wordVector[i].first.getGlobalBounds().width < -50.f)
+                    if (wordVector[i].first.getGlobalBounds().left + wordVector[i].first.getGlobalBounds().width < -50.f) // if out of bounds
                     {
                         ++outofbounds;
-                        wordVector[i].first.setString("");
+                        wordVector[i].first.setString(""); // erase
                     }
                     break;
                 case UP:
                     wordVector[i].first.move(0, -speed);
-                    if (wordVector[i].first.getGlobalBounds().top < -50.f)
+                    if (wordVector[i].first.getGlobalBounds().top < -50.f) // if out of bounds
                     {
                         ++outofbounds;
-                        wordVector[i].first.setString("");
+                        wordVector[i].first.setString(""); // erase
                     }
                     break;
                 case DOWN:
                     wordVector[i].first.move(0, speed);
 
-                    if (wordVector[i].first.getGlobalBounds().top + wordVector[i].first.getGlobalBounds().height > 920.f)
+                    if (wordVector[i].first.getGlobalBounds().top + wordVector[i].first.getGlobalBounds().height > 920.f) // if out of bounds
                     {
                         ++outofbounds;
-                        wordVector[i].first.setString("");
+                        wordVector[i].first.setString(""); // erase
                     }
                     break;
                 default:
@@ -348,7 +445,7 @@ void updateLifeTracker(std::array<sf::Sprite *, 3> &lifeArray, std::array<sf::Sp
 {
     if (lifeArray[0] != deadArray[0] && liveslost != 0)
     {
-        lifeArray[0] = deadArray[0];
+        lifeArray[0] = deadArray[0]; // replaces the purple star with a gray one to show it's dead/gone
         --liveslost;
     }
     if (lifeArray[1] != deadArray[1] && liveslost != 0)
@@ -387,17 +484,41 @@ void updateComboCPS(bool correct, int &combo, int &highestCombo, sf::Text &combo
     playerKey = "";
 }
 
-void increaseDifficulty(sf::Time seconds, double &speed, int &speedincreases)
+void increaseDifficulty(double &speed)
 {
-    if (seconds.asSeconds() > 15 && speedincreases == 0)
+    speed += 0.01;
+}
+
+void randomTaunt(sf::Text &taunt)
+{
+    int random = rand() % 6 + 1; // randomizing the taunt for the game over screen
+
+    switch (random)
     {
-        speed += 0.25;
-        ++speedincreases;
-    }
-    if (seconds.asSeconds() > 30 && speedincreases == 1) 
-    {
-        speed += 0.25;
-        ++speedincreases;
+        case 1:
+            taunt.setString("I think even my grandma could do better than that!");
+            taunt.setPosition(580.f,225.f);
+            break;
+        case 2:
+            taunt.setString("Wow, and I thought I was bad!");
+            taunt.setPosition(715.f,225.f);
+            break;
+        case 3:
+            taunt.setString("That's amazing...ly bad for someone your age.");
+            taunt.setPosition(620.f,225.f);
+            break;
+        case 4:
+            taunt.setString("Did you even try?");
+            taunt.setPosition(795.f,225.f);
+            break;
+        case 5:
+            taunt.setString("Try an easier mode next time...");
+            taunt.setPosition(715.f,225.f);
+            break;
+        case 6:
+            taunt.setString("That was done quick!");
+            taunt.setPosition(780.f,225.f);
+            break;
     }
 }
 

@@ -235,7 +235,7 @@ K& findRandom(void)
 	{
 		random = rand() % vectorsize;
 		for (v = 0; v != random; ++v);
-	} while (linvector.at(v).state != VALID || linvector.at(v).state == ONSCREEN);
+	} while (linvector.at(v).state != VALID || linvector.at(v).state == ONSCREEN); // find a valid word that is not already onscreen
 
 	linvector.at(v).state = ONSCREEN;
 	return linvector.at(v).entry.first;

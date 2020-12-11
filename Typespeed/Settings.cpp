@@ -78,7 +78,7 @@
     }
 
     // ****************************FUNCTIONS****************************
-    Action Settings::checkButtons(bool clicked, sf::Vector2f mousePos)
+    Action Settings::checkButtons(sf::Vector2f mousePos, bool clicked)
     {
         Action result = NONE;
 

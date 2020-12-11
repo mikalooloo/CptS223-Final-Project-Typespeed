@@ -189,10 +189,10 @@ public:
     *  Outputs: Action (no buttons: OPTIONS, back: NONE, other: other)
     *  Preconditions: result is OPTIONS/currently on the OPTIONS screen
     *  Date Created: 12/08/2020
-    *  Date Last Modified: n/a
-    *  Update Notes: n/a
+    *  Date Last Modified: 12/10/2020
+    *  Update Notes: rearranged the parameters to match the Button class's checkClick
     */
-    Action checkButtons(bool clicked, sf::Vector2f mousePos);
+    Action checkButtons(sf::Vector2f mousePos, bool clicked);
     /* 
     *  Function: checkTime
     *  Description: checks to see if we should add or remove a button click cooldown
