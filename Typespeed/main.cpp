@@ -74,8 +74,11 @@ int main(int argc, char * argv[])
     // *******TEXTS AND FONTS*******
     sf::Font font;
     createAsset<sf::Font>(&font, "Fonts/Seaside Resort Font.ttf");
+    sf::Font rulesFont;
+    createAsset<sf::Font>(&rulesFont,"Fonts/Typewriter.ttf");
     sf::Text text("", font, 30);
     text.setPosition(30.0f, 30.f); // top left
+    
 
     // MAIN MENU
     sf::Text titletext("Typespeed", font, 80);
@@ -93,6 +96,28 @@ int main(int argc, char * argv[])
     creditstext3.setPosition(1445.0f, 425.0f); // righthand side of main menu
 
     std::array<sf::Text *,6> textArray = { &titletext, &subtitletext1, &subtitletext2, &creditstext1, &creditstext2, &creditstext3};
+
+    // RULES
+    sf::Text rulesTitle("Rules", font, 80);
+    rulesTitle.setPosition(805.f,50.f);
+    sf::Text rulesText1("Here's an explanation of the game and how to play:", rulesFont, 45);
+    rulesText1.setPosition(280.f,150.f);
+    sf::Text rulesText2("Words will, by default, fly from the left to the right (you can change this in Options).", rulesFont, 30);
+    rulesText2.setPosition(230.f,220.f);
+    sf::Text rulesText3("Your job is to type these words and press enter before they reach the edge of the screen.", rulesFont, 30);
+    rulesText3.setPosition(220.f,270.f);
+    sf::Text rulesText4("The more words you get correct in a row, the higher your Combo score will be,", rulesFont, 30);
+    rulesText4.setPosition(270.f,340.f);
+    sf::Text rulesText5("and the faster you type these words correctly, the higher your Characters Per Second (CPS) score will be.", rulesFont, 30);
+    rulesText5.setPosition(100.f,390.f);
+    sf::Text rulesText6("However, if the words go past the edge of the screen before you're able to type them,", rulesFont, 30);
+    rulesText6.setPosition(230.f,460.f);
+    sf::Text rulesText7("your Combo will be reset and you will lose a life, symbolized by 3 purple stars in the top right corner.", rulesFont, 30);
+    rulesText7.setPosition(100.f,510.f);
+    sf::Text rulesText8("If you lose all 3 stars, the game is over. How well do you think you can do?", rulesFont, 30);
+    rulesText8.setPosition(300.f,700.f);
+
+    std::array<sf::Text *, 9> rulesArray = { &rulesTitle, &rulesText1, &rulesText2, &rulesText3, &rulesText4, &rulesText5, &rulesText6, &rulesText7, &rulesText8 };
 
     // OPTIONS
     sf::Text optionstext("Options", font, 80);
@@ -144,27 +169,33 @@ int main(int argc, char * argv[])
         }
 
         // *******MOUSE POSITIONING*******
-        if (result == NONE) // if currently in main menu, check to see where the mouse is
-        {
-            auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
-            
-            // if yes, check if it was a button that was clicked, otherwise check for hovering
-            for (long unsigned int i = 0; i < buttonArray.size() && result == NONE; ++i)
-            {
-                result = buttonArray[i]->checkClick(translated_pos, clicked);
-            }
+        auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
 
-        }
-        else if (result == OPTIONS) // if currently in options, check to see where the mouse is
+        switch (result)
         {
-            auto translated_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            clicked = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left); // is something being clicked?
-            
-            // if yes, check if it was a button that was clicked, otherwise check for hovering
-            // if settings.checkButtons() returns OPTIONS, then none of the buttons were clicked
-            result = settings.checkButtons(translated_pos, clicked);
-        }
+            case NONE: // if currently in main menu, check to see where the mouse is
+                // if clicked is true, check if it was a button that was clicked, otherwise check for hovering
+                for (long unsigned int i = 0; i < buttonArray.size() && result == NONE; ++i)
+                {
+                    result = buttonArray[i]->checkClick(translated_pos, clicked);
+                }   
+                break;
+            case RULES:
+                result = backButton.checkClick(translated_pos, clicked);
+                if (result == NONE) result = RULES;
+                else if (result == BACK) result = NONE;
+
+                break;
+            case OPTIONS:
+                // if yes, check if it was a button that was clicked, otherwise check for hovering
+                // if settings.checkButtons() returns OPTIONS, then none of the buttons were clicked
+                result = settings.checkButtons(translated_pos, clicked);
+                break;
+            default:
+                break;
+        } 
+
 
         // *******MAIN MENU and BUTTONS*******
         switch (result) // currently all this does is puts up text that says it's loading the blank
@@ -198,11 +229,17 @@ int main(int argc, char * argv[])
                 break;
 
             case RULES:
-                if(rulesbutton.getClickState() == CLICKED) text.setString("Loading the rules...");
                 rulesbutton.setClickState(NORMALB);
 
                 window.clear();
-                window.draw(text);
+                
+                for (long unsigned int i = 0; i < rulesArray.size(); ++i)
+                {
+                    window.draw(*rulesArray[i]);
+                }
+
+                window.draw(backButton.getSprite());
+
                 window.display();
                 break;
 
