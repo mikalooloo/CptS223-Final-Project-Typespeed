@@ -111,9 +111,10 @@ void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Dir
 *  Preconditions: n/a
 *  Date Created: 12/09/2020
 *  Date Last Modified: 12/10/2020
-*  Update Notes: changed speed from an int to double
+*  Update Notes: changed speed from an int to double, changed return type from void to int
 */
-void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed);
+int updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed);
+void updateLifeTracker(std::array<sf::Sprite *, 3> &lifeArray, std::array<sf::Sprite *, 3> &deadArray, int liveslost);
 /* 
 *  Function: updateComboCPS
 *  Description: updates the combo and CPS numbers based on whether or not the player entered a correct word (bool correct)
@@ -121,11 +122,21 @@ void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double
 *  Outputs: n/a
 *  Preconditions: something was entered
 *  Date Created: 12/06/2020
-*  Date Last Modified: n/a
-*  Update Notes: n/a
+*  Date Last Modified: 12/10/2020
+*  Update Notes: added highestcombo to parameter list
 */
-void updateComboCPS(bool correct, int &combo, sf::Text &comboNum, int &correctCharacters, double &cps, std::string &cpsString, sf::Text &cpsNum, sf::Clock &clock, std::string &playerKey);
-
+void updateComboCPS(bool correct, int &combo, int &highestCombo, sf::Text &comboNum, int &correctCharacters, double &cps, std::string &cpsString, sf::Text &cpsNum, sf::Clock &clock, std::string &playerKey);
+/* 
+*  Function: increaseDifficulty
+*  Description: 
+*  Inputs:
+*  Outputs:
+*  Preconditions:
+*  Date Created: 
+*  Date Last Modified: 
+*  Update Notes: 
+*/
+void increaseDifficulty(sf::Time seconds, double &speed, int &speedincreases);
 /* 
 *  Function: loadMainMenu
 *  Description: clears the window, draws background, all buttons and text, displays window for main menu
@@ -145,10 +156,10 @@ void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array
 *  Outputs: n/a
 *  Preconditions: gamePlay is running
 *  Date Created: 12/06/2020
-*  Date Last Modified: n/a
-*  Update Notes: n/a
+*  Date Last Modified: 12/10/2020
+*  Update Notes: added lifeArray to parameter list
 */
-void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector);
+void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector, std::array<sf::Sprite *, 3> &lifeArray);
 
 #endif
 

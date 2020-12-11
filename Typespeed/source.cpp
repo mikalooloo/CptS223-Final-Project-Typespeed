@@ -50,15 +50,41 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
         wordVector.push_back(std::make_pair(word,RIGHT));
     }
 
+    sf::Texture lifeATexture;
+    createAsset<sf::Texture>(&lifeATexture, "Images/StarLifeAlive.png");
+    sf::Texture lifeDTexture;
+    createAsset<sf::Texture>(&lifeDTexture, "Images/StarLifeDead.png");
+
+    sf::Sprite lifeA1(lifeATexture);
+    sf::Sprite lifeA2(lifeATexture);
+    sf::Sprite lifeA3(lifeATexture);
+    sf::Sprite lifeD1(lifeDTexture);
+    sf::Sprite lifeD2(lifeDTexture);
+    sf::Sprite lifeD3(lifeDTexture);
+
+    std::array<sf::Sprite *, 3> lifeArray = { &lifeA1, &lifeA2, &lifeA3 }; // these will change to the dead versions when a life is lost
+    std::array<sf::Sprite *, 3> deadArray = { &lifeD1, &lifeD2, &lifeD3 };
+
+    float pos1 = 1550.f;
+    for (int i = 0; i < 3; ++i)
+    {
+        lifeArray[i]->setScale(0.25, 0.25);
+        deadArray[i]->setScale(0.25, 0.25);
+        lifeArray[i]->setPosition(pos1, 25.f);
+        deadArray[i]->setPosition(pos1, 25.f);
+        pos1 += 100.f;
+    }
+
     // *******VARIABLES*******
+    bool gameover = false;
     sf::String playerInput; // used to read playerInput
     std::string playerKey = ""; // used to search hash table and helps keep track of # of correct characters
-
     std::string randomWord = "";
 
     int correctCharacters = 0; 
     double cps = 0.0; // correct characters per second
     std::string cpsString = ""; // used to shorten string to one decimal place
+    int highestCombo = 0;
     int combo = 0;
     bool correct = false; // if what the player typed was correct or not
 
@@ -66,7 +92,11 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     sf::Clock overallTime;
     int seconds; // every this many seconds, a new word appears on the screen
     double speed; // how fast the words go
+    int speedincreases = 0; // how many times the speed has been increased during gameplay
     int onscreen = 0; // how many words are onscreen
+    int outofbounds = 0; // how many words became out of bounds and were removed
+    int lives = 3; // how many lives the player has (once it reaches 0 the game ends)
+
     if (settings.getDifficulty() == EASY) 
     {
         seconds = 6; 
@@ -75,12 +105,12 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
     else if (settings.getDifficulty() == NORMAL) 
     {
         seconds = 4;
-        speed = 1;
+        speed = 0.75;
     }
     else 
     {
         seconds = 2;
-        speed = 1.5;
+        speed = 1;
     }
 
 
@@ -124,18 +154,20 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
 
         }
 
+        if (!gameover)
+        {
+        
         if (clock.getElapsedTime().asSeconds() > seconds && onscreen < 14) // if this is true, then we need to add a new word
         {
             ++onscreen;
             addNewWord(hash,wordVector,settings.getDirection());
-            if (onscreen < 13 && (settings.getDifficulty() == HARD || (settings.getDifficulty() == NORMAL && combo > 10))) // if it's on hard or normal, add another word at the same time
+            // if it's hard or it's normal and they have at least a combo of 10
+            if (onscreen < 13 && (settings.getDifficulty() == HARD || (settings.getDifficulty() == NORMAL && combo > 10)))
             {
                 addNewWord(hash,wordVector,settings.getDirection());
             }
             clock.restart();
         } 
-        // search hash table for playerKey if playerKey is not "", add character # to correct cps if it was found and is on the screen, remove from onscreen
-        // also add one to combo if it's correct, set to 0 if not
 
         if (playerKey != "") // if playerKey is not "", then player has entered something
         {
@@ -158,13 +190,33 @@ void gamePlay(sf::RenderWindow &window, sf::Font &screenFont, Settings &settings
                 correct = false;
             }
             
-            updateComboCPS(correct,combo,comboNum,correctCharacters,cps,cpsString,cpsNum,overallTime,playerKey);
+            updateComboCPS(correct,combo,highestCombo,comboNum,correctCharacters,cps,cpsString,cpsNum,overallTime,playerKey);
         }
-            
-        updateWords(wordVector, speed);
-        background.update();
+        
+        
+        increaseDifficulty(overallTime.getElapsedTime(), speed, speedincreases);
+        outofbounds = updateWords(wordVector, speed);
+        if (outofbounds != 0) // this means at least 1 word went out of the bounds
+        {
+            lives -= outofbounds; // remove a life for each word out of bounds
+            updateLifeTracker(lifeArray, deadArray, outofbounds); // update the visual life tracker
+            if (highestCombo < combo) highestCombo = combo;
+            combo = 0; // reset combo
+            comboNum.setString(std::to_string(combo));
+            onscreen -= outofbounds; 
+            outofbounds = 0;
+        }
+        // check if game is over!
+        if (lives < 1) gameover = true;
 
-        loadGamePlay(&window, background.getSprite(), textArray, wordVector);
+        background.update();
+        loadGamePlay(&window, background.getSprite(), textArray, wordVector, lifeArray);
+        } 
+        else
+        {
+            // put game over screen here and allow to return to main menu
+        }
+        
     }
 
 }
@@ -194,7 +246,7 @@ void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Dir
         switch (d) // generate a random placement
         {
             case RIGHT: // if going to the right (coming from the left)
-                randomXY.x = -150.f;
+                randomXY.x = -200.f;
                 randomXY.y = rand() % 700 + 5;
                 break;
             case LEFT: // if going to the left (coming from the right)
@@ -239,8 +291,10 @@ void randomPlacement(std::string randomWord, std::vector<std::pair<sf::Text, Dir
     } while (overlapping); // I'm sure this can be done better but I didn't think about this as a potential problem until after I saw it happen
 }
 
-void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed)
+int updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double speed)
 {
+    int outofbounds = 0;
+
     for (long unsigned int i = 0; i < wordVector.size(); ++i) // for each element in the wordVector
     {
         if (wordVector[i].first.getString() != "") // if it's not empty,
@@ -249,24 +303,67 @@ void updateWords(std::vector<std::pair<sf::Text, Direction>> &wordVector, double
             {
                 case RIGHT:
                     wordVector[i].first.move(speed, 0);
+
+                    if (wordVector[i].first.getGlobalBounds().left > 1845.f)
+                    {
+                        ++outofbounds;
+                        wordVector[i].first.setString("");
+                    }
                     break;
                 case LEFT:
                     wordVector[i].first.move(-speed, 0);
+
+                    if (wordVector[i].first.getGlobalBounds().left + wordVector[i].first.getGlobalBounds().width < -50.f)
+                    {
+                        ++outofbounds;
+                        wordVector[i].first.setString("");
+                    }
                     break;
                 case UP:
                     wordVector[i].first.move(0, -speed);
+                    if (wordVector[i].first.getGlobalBounds().top < -50.f)
+                    {
+                        ++outofbounds;
+                        wordVector[i].first.setString("");
+                    }
                     break;
                 case DOWN:
                     wordVector[i].first.move(0, speed);
+
+                    if (wordVector[i].first.getGlobalBounds().top + wordVector[i].first.getGlobalBounds().height > 920.f)
+                    {
+                        ++outofbounds;
+                        wordVector[i].first.setString("");
+                    }
                     break;
                 default:
                     break;
             }
         }
     }
+
+    return outofbounds;
+}
+void updateLifeTracker(std::array<sf::Sprite *, 3> &lifeArray, std::array<sf::Sprite *, 3> &deadArray, int liveslost)
+{
+    if (lifeArray[0] != deadArray[0] && liveslost != 0)
+    {
+        lifeArray[0] = deadArray[0];
+        --liveslost;
+    }
+    if (lifeArray[1] != deadArray[1] && liveslost != 0)
+    {
+        lifeArray[1] = deadArray[1];
+        --liveslost;
+    }
+        if (lifeArray[2] != deadArray[2] && liveslost != 0)
+    {
+        lifeArray[2] = deadArray[2];
+        --liveslost;
+    }
 }
 
-void updateComboCPS(bool correct, int &combo, sf::Text &comboNum, int &correctCharacters, double &cps, std::string &cpsString, sf::Text &cpsNum, sf::Clock &clock, std::string &playerKey)
+void updateComboCPS(bool correct, int &combo, int &highestCombo, sf::Text &comboNum, int &correctCharacters, double &cps, std::string &cpsString, sf::Text &cpsNum, sf::Clock &clock, std::string &playerKey)
 {
     if (correct) // if the word entered was correct,
     {
@@ -282,11 +379,26 @@ void updateComboCPS(bool correct, int &combo, sf::Text &comboNum, int &correctCh
     }
     else // if it wasn't correct,
     {
+        if (highestCombo < combo) highestCombo = combo;
         combo = 0; // reset their combo
         comboNum.setString(std::to_string(combo));
     }
 
     playerKey = "";
+}
+
+void increaseDifficulty(sf::Time seconds, double &speed, int &speedincreases)
+{
+    if (seconds.asSeconds() > 15 && speedincreases == 0)
+    {
+        speed += 0.25;
+        ++speedincreases;
+    }
+    if (seconds.asSeconds() > 30 && speedincreases == 1) 
+    {
+        speed += 0.25;
+        ++speedincreases;
+    }
 }
 
 void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array<Button *, 4> &buttonArray, std::array<sf::Text *, 6> &textArray)
@@ -308,13 +420,18 @@ void loadMainMenu(sf::RenderWindow * window, sf::Sprite * background, std::array
     window->display();
 }
 
-void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector)
+void loadGamePlay(sf::RenderWindow * window, sf::Sprite * background, std::array<sf::Text *, 5> &textArray, std::vector<std::pair<sf::Text, Direction>> &wordVector, std::array<sf::Sprite *, 3> &lifeArray)
 {
     window->clear();
     window->draw(*background);
     for (long unsigned int i = 0; i < textArray.size(); ++i) // prints all text
     {
         window->draw(*textArray[i]);
+    }
+
+    for(long unsigned int i = 0; i < lifeArray.size(); ++i)
+    {
+        window->draw(*lifeArray[i]);
     }
 
     for (long unsigned int i = 0; i < wordVector.size(); ++i)
